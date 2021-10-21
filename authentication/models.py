@@ -7,14 +7,14 @@ from django.contrib.auth.models import (
 )
 from django.core.validators import RegexValidator
 from django.db.models import CharField, UUIDField
-from django.db.models.fields import BooleanField, DateTimeField
+from django.db.models.fields import BigIntegerField, BooleanField, DateTimeField
 
 
 class UserManager(BaseUserManager):
     def create_user(
         self,
         phone_number,
-        password=None,
+        password,
         is_staff=False,
         is_superuser=False,
         is_active=True,
@@ -61,6 +61,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         blank=False,
         unique=True,
     )
+
+    code_expire = BigIntegerField(null=True,blank=True)
 
     is_active = BooleanField(default=True)
     is_staff = BooleanField(default=False)

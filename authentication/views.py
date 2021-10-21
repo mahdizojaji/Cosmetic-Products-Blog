@@ -12,6 +12,7 @@ from dj_rest_auth.views import (
     UserDetailsView,
 )
 from dj_rest_auth.utils import jwt_encode
+from django.utils import timezone
 
 from .serializers import SendCodeSerializer, LoginSerializer
 from extensions.sms import generate_random_code
@@ -36,11 +37,10 @@ class SendCode(CreateAPIView):
         # send_sms(user.phone_number, otp)
         sms_success, sms_error = True, None
         # # # # # # # # # # # # # # # # # #
-        expire_otp = OTP_EXPIRE * 60
-        cache.set(f"otp:{user.phone_number}", str(otp))
-        cache.expire(f"otp:{user.phone_number}", expire_otp)
+        expire_otp = OTP_EXPIRE * 2
+        # set code expire time
+        user.code_expire = int(timezone.now().timestamp()) + expire_otp
         # set otp as user password
-        print(f"{otp=}")
         user.set_password(otp)
         user.save()
         # responce based on sms_succes
@@ -74,24 +74,34 @@ class Login(LoginView):
         self.request = request
         self.serializer = self.get_serializer(data=self.request.data)
         self.serializer.is_valid(raise_exception=True)
+        phone = self.serializer.validated_data["phone_number"]
+        code = self.serializer.validated_data["password"]
         # authenticate user
         user = authenticate(
-            phone_number=self.serializer.validated_data["phone_number"],
-            password=self.serializer.validated_data["password"],
+            phone_number=phone,
+            password=code,
         )
         if user:
-            # generate tokens if auth was successful
-            self.user = user
-            self.access_token, self.refresh_token = jwt_encode(self.user)
-            # TODO: replace 'id' key in responce with user 'UUID' field
-            return self.get_response()
-        else:
-            # fail response
-            return Response(
-                {
-                    "error": "auth-code",
+            # checking code expire time
+            if user.code_expire > int(timezone.now().timestamp()):
+                # generating tokens
+                self.access_token, self.refresh_token = jwt_encode(user)
+                # TODO: replace 'id' key in responce with user 'UUID' field
+                # THE HAPPY ENDING ~>
+                return self.get_response()
+            else:
+                response = {
+                    "error": "auth-expire",
                     "message": "Authentication failed.",
-                    "detail": "Phone number or code is not valid.",
-                },
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
+                    "detail": "Login code expired.",
+                }
+        else:
+            response = {
+                "error": "auth-code",
+                "message": "Authentication failed.",
+                "detail": "Phone number or code is not valid.",
+            }
+        return Response(
+            response,
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
