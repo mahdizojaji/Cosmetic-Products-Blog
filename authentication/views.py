@@ -69,6 +69,10 @@ class SendCode(CreateAPIView):
 class Login(LoginView):
     serializer_class = LoginSerializer
 
+    def login(self):
+        self.access_token, self.refresh_token = jwt_encode(self.user)
+        self.process_login()
+
     def post(self, request, *args, **kwargs):
         self.request = request
         self.serializer = self.get_serializer(data=self.request.data)
@@ -84,8 +88,7 @@ class Login(LoginView):
             # checking code expire time
             if user.code_expire > int(timezone.now().timestamp()):
                 self.user = user
-                # generating tokens
-                self.access_token, self.refresh_token = jwt_encode(user)
+                self.login()
                 # TODO: replace 'id' key in responce with user 'UUID' field
                 # THE HAPPY ENDING ~>
                 return self.get_response()
