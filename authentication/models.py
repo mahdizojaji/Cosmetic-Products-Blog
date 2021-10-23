@@ -6,7 +6,7 @@ from django.contrib.auth.models import (
     PermissionsMixin,
 )
 from django.core.validators import RegexValidator
-from django.db.models import CharField, UUIDField
+from django.db.models import CharField, UUIDField, EmailField
 from django.db.models.fields import BigIntegerField, BooleanField, DateTimeField
 
 
@@ -61,6 +61,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         blank=False,
         unique=True,
     )
+
+    email = EmailField(null=True,blank=True)
 
     code_expire = BigIntegerField(null=True,blank=True)
 

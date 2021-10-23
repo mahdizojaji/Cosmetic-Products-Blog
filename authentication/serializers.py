@@ -19,5 +19,5 @@ class LoginSerializer(ModelSerializer):
 class UserDetailsSerializer(ModelSerializer):
     class Meta:
         model = User
-        fields = ("uuid", "phone_number")
+        fields = ("uuid", "phone_number", "email")
         read_only_fields = ("phone_number",)
