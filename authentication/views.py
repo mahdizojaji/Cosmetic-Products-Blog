@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model, authenticate
 from rest_framework import status
 from rest_framework.generics import CreateAPIView
-from django.core.cache import cache
 from config.settings import OTP_EXPIRE, SMS
 from rest_framework.response import Response
 from dj_rest_auth.views import (
@@ -37,7 +36,7 @@ class SendCode(CreateAPIView):
         # send_sms(user.phone_number, otp)
         sms_success, sms_error = True, None
         # # # # # # # # # # # # # # # # # #
-        expire_otp = OTP_EXPIRE * 2
+        expire_otp = OTP_EXPIRE * 60
         # set code expire time
         user.code_expire = int(timezone.now().timestamp()) + expire_otp
         # set otp as user password
@@ -84,6 +83,7 @@ class Login(LoginView):
         if user:
             # checking code expire time
             if user.code_expire > int(timezone.now().timestamp()):
+                self.user = user
                 # generating tokens
                 self.access_token, self.refresh_token = jwt_encode(user)
                 # TODO: replace 'id' key in responce with user 'UUID' field
