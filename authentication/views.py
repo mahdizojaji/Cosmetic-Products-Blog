@@ -13,7 +13,7 @@ from dj_rest_auth.views import (
 from dj_rest_auth.utils import jwt_encode
 from django.utils import timezone
 
-from .serializers import SendCodeSerializer, LoginSerializer
+from .serializers import SendCodeSerializer, LoginSerializer, UserDetailsSerializer
 from extensions.sms import generate_random_code
 
 User = get_user_model()
@@ -105,3 +105,7 @@ class Login(LoginView):
             response,
             status=status.HTTP_401_UNAUTHORIZED,
         )
+
+
+class UserDetails(UserDetailsView):
+    serializer_class = UserDetailsSerializer
