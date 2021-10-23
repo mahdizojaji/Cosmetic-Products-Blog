@@ -3,13 +3,7 @@ from rest_framework import status
 from rest_framework.generics import CreateAPIView
 from config.settings import OTP_EXPIRE, SMS
 from rest_framework.response import Response
-from dj_rest_auth.views import (
-    LoginView,
-    PasswordChangeView,
-    PasswordResetConfirmView,
-    PasswordResetView,
-    UserDetailsView,
-)
+from dj_rest_auth.views import LoginView, UserDetailsView
 from dj_rest_auth.utils import jwt_encode
 from django.utils import timezone
 

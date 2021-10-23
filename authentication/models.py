@@ -64,7 +64,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     email = EmailField(null=True,blank=True)
 
-    code_expire = BigIntegerField(null=True,blank=True)
+    code_expire = BigIntegerField(default=0,blank=True)
 
     is_active = BooleanField(default=True)
     is_staff = BooleanField(default=False)

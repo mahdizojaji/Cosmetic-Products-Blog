@@ -3,7 +3,7 @@ from dj_rest_auth.jwt_auth import get_refresh_view
 from django.urls import path, include
 from .views import SendCode, Login, UserDetails
 
-app_name = "auth"
+app_name = "authentication"
 
 urlpatterns = [
     path("users/send_code/", SendCode.as_view(), name="send_code"),
