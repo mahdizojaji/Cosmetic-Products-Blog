@@ -8,7 +8,7 @@ from dj_rest_auth.utils import jwt_encode
 from django.utils import timezone
 from rest_framework.permissions import IsAuthenticated
 
-from .permissions import AuthSelfOrAdminOnly
+from .permissions import OwnerAndAdmin, OwnerAndAdminOrReadOnly
 from .serializers import (
     SendCodeSerializer,
     LoginSerializer,
@@ -113,7 +113,8 @@ class Login(LoginView):
 
 
 class UserDetails(UserDetailsView):
-    serializer_class = UserDetailsSerializer
+    serializer_class = UserDetailsSerializer  
+    permission_classes = [IsAuthenticated]
 
 
 class UserProfile(RetrieveAPIView):
@@ -121,7 +122,7 @@ class UserProfile(RetrieveAPIView):
     lookup_field = "uuid"
 
     def get_serializer_class(self):
-        if AuthSelfOrAdminOnly().has_object_permission(
+        if OwnerAndAdmin().has_object_permission(
             request=self.request, view=self, obj=self.get_object()
         ):
             return UserProfileFullSerializer

@@ -1,7 +1,7 @@
 from rest_framework.permissions import IsAuthenticated
 
 
-class AuthSelfOrAdminOnly(IsAuthenticated):
+class OwnerAndAdmin(IsAuthenticated):
     """This premissions is only True for
     Authenticated Admin or Owner itself"""
 
@@ -13,3 +13,7 @@ class AuthSelfOrAdminOnly(IsAuthenticated):
             return True
 
         return False
+
+
+class OwnerAndAdminOrReadOnly(IsAuthenticated):
+    pass
