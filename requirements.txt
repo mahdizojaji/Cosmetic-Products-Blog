@@ -2,3 +2,7 @@ django==3.2.8
 djangorestframework==3.12.4
 markdown==3.3.4
 python-dotenv==0.19.1
+dj-rest-auth
+djangorestframework-simplejwt
+psycopg2-binary
+django-redis
