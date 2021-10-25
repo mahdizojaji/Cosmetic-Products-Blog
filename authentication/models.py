@@ -6,8 +6,16 @@ from django.contrib.auth.models import (
     PermissionsMixin,
 )
 from django.core.validators import RegexValidator
-from django.db.models import CharField, UUIDField, EmailField
-from django.db.models.fields import BigIntegerField, BooleanField, DateTimeField
+from django.db.models import (
+    CharField,
+    UUIDField,
+    EmailField,
+    BigIntegerField,
+    BooleanField,
+    DateField,
+    DateTimeField,
+    ImageField,
+)
 
 
 class UserManager(BaseUserManager):
@@ -49,11 +57,9 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     uuid = UUIDField(verbose_name="UUID", default=uuid.uuid4)
-
     phone_number_validator = RegexValidator(
         regex=r"^\+989\d{9}$", message="Phone number must be entered."
     )
-
     phone_number = CharField(
         validators=[phone_number_validator],
         max_length=13,
@@ -61,10 +67,24 @@ class User(AbstractBaseUser, PermissionsMixin):
         blank=False,
         unique=True,
     )
+    code_expire = BigIntegerField(default=0, blank=True)
+    email = EmailField(null=True, blank=True)
+    birth_date = DateField(null=True, blank=True)
+    fname = CharField(max_length=30, null=True, blank=True)
+    lname = CharField(max_length=30, null=True, blank=True)
+    avatar_img = ImageField(upload_to=None, height_field=None, width_field=None)
+    cover_img = ImageField(upload_to=None, height_field=None, width_field=None)
+    province = CharField(max_length=30)
+    city = CharField(max_length=30)
+    vip_expire = BigIntegerField(default=0, blank=True)
 
-    email = EmailField(null=True,blank=True)
-
-    code_expire = BigIntegerField(default=0,blank=True)
+    ### this isnt approved yet ###
+    ##############################################
+    likes = BigIntegerField(default=0, blank=True)
+    rates = BigIntegerField(default=0, blank=True)
+    bookmarks = BigIntegerField(default=0, blank=True)
+    shares = BigIntegerField(default=0, blank=True)
+    ###############################################
 
     is_active = BooleanField(default=True)
     is_staff = BooleanField(default=False)

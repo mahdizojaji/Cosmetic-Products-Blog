@@ -6,3 +6,4 @@ dj-rest-auth
 djangorestframework-simplejwt
 psycopg2-binary
 django-redis
+pillow
