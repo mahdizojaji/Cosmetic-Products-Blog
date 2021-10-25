@@ -19,14 +19,9 @@ class LoginSerializer(ModelSerializer):
 class UserDetailsSerializer(ModelSerializer):
     class Meta:
         model = User
-        fields = ("uuid", "phone_number", "email")
-        read_only_fields = ("phone_number",)
-
-
-class UserUpdateSerializer(ModelSerializer):
-    class Meta:
-        model = User
         fields = (
+            "uuid",
+            "phone_number",
             "email",
             "birth_date",
             "fname",
@@ -36,21 +31,7 @@ class UserUpdateSerializer(ModelSerializer):
             "province",
             "city",
         )
-
-
-class UserUpdateSerializer(ModelSerializer):
-    class Meta:
-        model = User
-        fields = (
-            "email",
-            "birth_date",
-            "fname",
-            "lname",
-            "avatar_img",
-            "cover_img",
-            "province",
-            "city",
-        )
+        read_only_fields = ("uuid", "phone_number")
 
 
 class UserProfileFullSerializer(ModelSerializer):

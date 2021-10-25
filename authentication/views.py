@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model, authenticate
 from rest_framework import status
-from rest_framework.generics import CreateAPIView, RetrieveAPIView, UpdateAPIView
+from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from config.settings import OTP_EXPIRE, SMS
 from rest_framework.response import Response
 from dj_rest_auth.views import LoginView, UserDetailsView
@@ -15,7 +15,6 @@ from .serializers import (
     UserDetailsSerializer,
     UserProfileFullSerializer,
     UserProfileLimitedSerializer,
-    UserUpdateSerializer,
 )
 from extensions.sms import generate_random_code
 
@@ -115,13 +114,6 @@ class Login(LoginView):
 
 class UserDetails(UserDetailsView):
     serializer_class = UserDetailsSerializer
-
-
-class UserUpdate(UpdateAPIView):
-    permission_classes = [AuthSelfOrAdminOnly]
-    serializer_class = UserUpdateSerializer
-    queryset = User.objects.all()
-    lookup_field = "uuid"
 
 
 class UserProfile(RetrieveAPIView):
