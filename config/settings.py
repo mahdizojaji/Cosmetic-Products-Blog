@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "dj_rest_auth",
     # Django Local Apps
     "authentication.apps.AuthenticationConfig",
+    "blog.apps.BlogConfig",
     # Local Packages
     "extensions",
 ]
