@@ -187,7 +187,7 @@ CACHES = {
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
 
-OTP_EXPIRE = os.environ["OTP_EXPIRE"]  # per minutes
+OTP_EXPIRE = int(os.environ["OTP_EXPIRE"])  # per minutes
 
 SMS = {
     "API-KEY": os.environ["SMS_API_KEY"],
