@@ -2,7 +2,7 @@ from rest_framework.permissions import IsAuthenticated
 
 
 class AuthSelfOrAdminOnly(IsAuthenticated):
-    """This premissions is only True for 
+    """This premissions is only True for
     Authenticated Admin or Owner itself"""
 
     def has_object_permission(self, request, view, obj):

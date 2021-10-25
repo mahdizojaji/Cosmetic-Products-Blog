@@ -1,17 +1,20 @@
 from django.contrib.auth import get_user_model, authenticate
 from rest_framework import status
-from rest_framework.generics import CreateAPIView, UpdateAPIView
+from rest_framework.generics import CreateAPIView, RetrieveAPIView, UpdateAPIView
 from config.settings import OTP_EXPIRE, SMS
 from rest_framework.response import Response
 from dj_rest_auth.views import LoginView, UserDetailsView
 from dj_rest_auth.utils import jwt_encode
 from django.utils import timezone
+from rest_framework.permissions import IsAuthenticated
 
 from .permissions import AuthSelfOrAdminOnly
 from .serializers import (
     SendCodeSerializer,
     LoginSerializer,
     UserDetailsSerializer,
+    UserProfileFullSerializer,
+    UserProfileLimitedSerializer,
     UserUpdateSerializer,
 )
 from extensions.sms import generate_random_code
@@ -119,3 +122,16 @@ class UserUpdate(UpdateAPIView):
     serializer_class = UserUpdateSerializer
     queryset = User.objects.all()
     lookup_field = "uuid"
+
+
+class UserProfile(RetrieveAPIView):
+    queryset = User.objects.all()
+    lookup_field = "uuid"
+
+    def get_serializer_class(self):
+        if AuthSelfOrAdminOnly().has_object_permission(
+            request=self.request, view=self, obj=self.get_object()
+        ):
+            return UserProfileFullSerializer
+
+        return UserProfileLimitedSerializer

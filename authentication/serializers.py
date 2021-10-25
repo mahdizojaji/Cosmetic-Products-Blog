@@ -36,3 +36,45 @@ class UserUpdateSerializer(ModelSerializer):
             "province",
             "city",
         )
+
+
+class UserUpdateSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            "email",
+            "birth_date",
+            "fname",
+            "lname",
+            "avatar_img",
+            "cover_img",
+            "province",
+            "city",
+        )
+
+
+class UserProfileFullSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            "email",
+            "birth_date",
+            "fname",
+            "lname",
+            "avatar_img",
+            "cover_img",
+            "province",
+            "city",
+        )
+
+
+class UserProfileLimitedSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            "fname",
+            "lname",
+            "avatar_img",
+            "cover_img",
+            "province",
+        )
