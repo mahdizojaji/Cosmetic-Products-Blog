@@ -82,9 +82,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     bookmarked_by = ManyToManyField(
         "authentication.User", related_name="user_bookmarked_by"
     )
+    share_qty = BigIntegerField(default=0, blank=True)
+    
     ### this isnt approved yet ###
     ##############################################
-    shares = BigIntegerField(default=0, blank=True)
     rates = BigIntegerField(default=0, blank=True)
     ###############################################
     is_active = BooleanField(default=True)

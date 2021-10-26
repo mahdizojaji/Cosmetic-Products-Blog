@@ -52,7 +52,7 @@ class UserProfileFullSerializer(ModelSerializer):
             "liked_by",
             "bookmarked_by",
             "rates",
-            "shares",
+            "share_qty",
             "vip_expire",
             "is_superuser",
         )
@@ -73,6 +73,6 @@ class UserProfileLimitedSerializer(ModelSerializer):
             "liked_by",
             "bookmarked_by",
             "rates",
-            "shares",
+            "share_qty",
         )
         ReadOnlyField = "__all__"

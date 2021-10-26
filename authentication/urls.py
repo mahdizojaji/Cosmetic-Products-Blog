@@ -1,7 +1,15 @@
 from rest_framework_simplejwt.views import TokenVerifyView
 from dj_rest_auth.jwt_auth import get_refresh_view
 from django.urls import path
-from .views import SendCode, Login, UserDetails, UserProfile, UserLike, UserBookmark
+from .views import (
+    SendCode,
+    Login,
+    UserDetails,
+    UserProfile,
+    UserLike,
+    UserBookmark,
+    UserShare,
+)
 
 app_name = "authentication"
 
@@ -13,6 +21,10 @@ urlpatterns = [
     path("users/details/", UserDetails.as_view(), name="user_details"),
     path("users/profile/<uuid:uuid>/", UserProfile.as_view(), name="user_profile"),
     path("users/profile/like/<uuid:uuid>/", UserLike.as_view(), name="user_like"),
-    path("users/profile/bookmark/<uuid:uuid>/", UserBookmark.as_view(), name="user_like"
+    path(
+        "users/profile/bookmark/<uuid:uuid>/",
+        UserBookmark.as_view(),
+        name="user_bookmark",
     ),
+    path("users/profile/share/<uuid:uuid>/", UserShare.as_view(), name="user_share"),
 ]

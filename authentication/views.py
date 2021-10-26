@@ -158,3 +158,15 @@ class UserBookmark(CreateAPIView):
         else:
             user_profile.bookmarked_by.add(user)
         return Response(status=status.HTTP_200_OK)
+
+
+class UserShare(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = User.objects.all()
+    lookup_field = "uuid"
+
+    def post(self, request, *args, **kwargs):
+        profile = self.get_object()
+        profile.share_qty += 1
+        profile.save()
+        return Response(status=status.HTTP_200_OK)
