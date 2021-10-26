@@ -12,7 +12,18 @@ User = get_user_model()
 
 
 class ArticleLike(CreateAPIView):
-    pass
+    permission_classes = [IsAuthenticated]
+    queryset = Article.objects.all()
+    lookup_field = "uuid"
+
+    def post(self, request, *args, **kwargs):
+        article = self.get_object()
+        user = request.user
+        if user in article.likes.all():
+            article.likes.remove(user)
+        else:
+            article.likes.add(user)
+        return Response(status=status.HTTP_200_OK)
 
 
 class ArticleDetails(RetrieveUpdateDestroyAPIView):
@@ -20,6 +31,7 @@ class ArticleDetails(RetrieveUpdateDestroyAPIView):
     serializer_class = ArticleSerializer
     permission_classes = [OwnerAndAdminOrReadOnly]
     lookup_field = "uuid"
+    
 
 
 class ArticleList(ListCreateAPIView):
