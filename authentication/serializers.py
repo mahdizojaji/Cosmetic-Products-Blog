@@ -1,4 +1,5 @@
 from rest_framework.serializers import ModelSerializer
+
 from .models import User
 
 
@@ -38,6 +39,8 @@ class UserProfileFullSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = (
+            "uuid",
+            "phone_number",
             "email",
             "birth_date",
             "fname",
@@ -46,16 +49,30 @@ class UserProfileFullSerializer(ModelSerializer):
             "cover_img",
             "province",
             "city",
+            "liked_by",
+            "bookmarked_by",
+            "rates",
+            "shares",
+            "vip_expire",
+            "is_superuser",
         )
+        ReadOnlyField = "__all__"
 
 
 class UserProfileLimitedSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = (
+            "uuid",
             "fname",
             "lname",
             "avatar_img",
             "cover_img",
             "province",
+            "city",
+            "liked_by",
+            "bookmarked_by",
+            "rates",
+            "shares",
         )
+        ReadOnlyField = "__all__"

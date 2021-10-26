@@ -15,6 +15,7 @@ from django.db.models import (
     DateField,
     DateTimeField,
     ImageField,
+    ManyToManyField,
 )
 
 
@@ -77,15 +78,15 @@ class User(AbstractBaseUser, PermissionsMixin):
     province = CharField(max_length=30)
     city = CharField(max_length=30)
     vip_expire = BigIntegerField(default=0, blank=True)
-
+    liked_by = ManyToManyField("authentication.User", related_name="user_liked_by")
+    bookmarked_by = ManyToManyField(
+        "authentication.User", related_name="user_bookmarked_by"
+    )
     ### this isnt approved yet ###
     ##############################################
-    likes = BigIntegerField(default=0, blank=True)
-    rates = BigIntegerField(default=0, blank=True)
-    bookmarks = BigIntegerField(default=0, blank=True)
     shares = BigIntegerField(default=0, blank=True)
+    rates = BigIntegerField(default=0, blank=True)
     ###############################################
-
     is_active = BooleanField(default=True)
     is_staff = BooleanField(default=False)
     is_superuser = BooleanField(default=False)

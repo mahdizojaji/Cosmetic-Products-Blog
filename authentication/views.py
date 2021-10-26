@@ -113,7 +113,7 @@ class Login(LoginView):
 
 
 class UserDetails(UserDetailsView):
-    serializer_class = UserDetailsSerializer  
+    serializer_class = UserDetailsSerializer
     permission_classes = [IsAuthenticated]
 
 
@@ -128,3 +128,33 @@ class UserProfile(RetrieveAPIView):
             return UserProfileFullSerializer
 
         return UserProfileLimitedSerializer
+
+
+class UserLike(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = User.objects.all()
+    lookup_field = "uuid"
+
+    def post(self, request, *args, **kwargs):
+        user_profile = self.get_object()
+        user = request.user
+        if user in user_profile.liked_by.all():
+            user_profile.liked_by.remove(user)
+        else:
+            user_profile.liked_by.add(user)
+        return Response(status=status.HTTP_200_OK)
+
+
+class UserBookmark(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = User.objects.all()
+    lookup_field = "uuid"
+
+    def post(self, request, *args, **kwargs):
+        user_profile = self.get_object()
+        user = request.user
+        if user in user_profile.bookmarked_by.all():
+            user_profile.bookmarked_by.remove(user)
+        else:
+            user_profile.bookmarked_by.add(user)
+        return Response(status=status.HTTP_200_OK)
