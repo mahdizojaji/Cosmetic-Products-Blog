@@ -38,3 +38,19 @@ class ArticleList(ListCreateAPIView):
     queryset = Article.objects.all().order_by("-created_at")
     serializer_class = ArticleSerializer
     permission_classes = [IsAuthenticated]
+
+
+class ArticleBookmark(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Article.objects.all()
+    lookup_field = "uuid"
+
+    def post(self, request, *args, **kwargs):
+        article = self.get_object()
+        user = request.user
+        if user in article.bookmarks.all():
+            article.bookmarks.remove(user)
+        else:
+            article.bookmarks.add(user)
+        return Response(status=status.HTTP_200_OK)
+
