@@ -59,3 +59,16 @@ class ArticleBookmark(CreateAPIView):
         else:
             article.bookmarks.add(user)
         return Response(status=status.HTTP_200_OK)
+
+
+# Increase an Article's share
+class ArticleShare(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Article.objects.all()
+    lookup_field = "uuid"
+
+    def post(self, request, *args, **kwargs):
+        article = self.get_object()
+        article.share_qty += 1
+        article.save()
+        return Response(status=status.HTTP_200_OK)
