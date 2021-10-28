@@ -13,6 +13,7 @@ from django.db.models import (
 from django.db.models.fields import UUIDField
 from django.utils.text import slugify
 
+
 class Article(Model):
     uuid = UUIDField(verbose_name="UUID", default=uuid4)
 
@@ -33,5 +34,5 @@ class Article(Model):
 
     def save(self, *args, **kwargs):
         """Slugify the title before save."""
-        self.slug_title = slugify(self.title,allow_unicode=True)
+        self.slug_title = slugify(self.title, allow_unicode=True)
         super(Article, self).save(*args, **kwargs)
