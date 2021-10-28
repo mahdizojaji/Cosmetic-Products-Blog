@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     # ThirdParty Packages
     "rest_framework",
     "dj_rest_auth",
+    "django_filters",
     # Django Local Apps
     "authentication.apps.AuthenticationConfig",
     "blog.apps.BlogConfig",
@@ -160,7 +161,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": ("dj_rest_auth.jwt_auth.JWTCookieAuthentication",)
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "dj_rest_auth.jwt_auth.JWTCookieAuthentication",
+    ),
+    "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
 }
 
 REST_USE_JWT = True

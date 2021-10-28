@@ -7,3 +7,4 @@ djangorestframework-simplejwt
 psycopg2-binary
 django-redis
 pillow
+django-filter

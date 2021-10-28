@@ -7,6 +7,8 @@ from rest_framework.generics import (
     RetrieveUpdateDestroyAPIView,
     CreateAPIView,
 )
+from django_filters import rest_framework as filters
+
 
 from authentication.permissions import OwnerAndAdminOrReadOnly, OwnerAndAdmin
 from .serializers import ArticleSerializer
@@ -19,6 +21,16 @@ class ArticleList(ListCreateAPIView):
     queryset = Article.objects.all().order_by("-created_at")
     serializer_class = ArticleSerializer
     permission_classes = [IsAuthenticated]
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_fields = (
+        "author",
+        "title",
+        "content",
+        "slug_title",
+    )
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
 
 
 # Retrieve, Update & Delete Articles

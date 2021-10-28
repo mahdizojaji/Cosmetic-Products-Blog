@@ -9,14 +9,16 @@ from django.db.models import (
     SlugField,
     TextField,
     ImageField,
+    CASCADE
 )
 from django.db.models.fields import UUIDField
+from django.db.models.fields.related import ForeignKey
 from django.utils.text import slugify
 
 
 class Article(Model):
     uuid = UUIDField(verbose_name="UUID", default=uuid4)
-
+    author = ForeignKey("authentication.User", on_delete=CASCADE)
     title = CharField(max_length=50, unique=True)
     content = TextField()
     slug_title = SlugField(unique=True, allow_unicode=True)
