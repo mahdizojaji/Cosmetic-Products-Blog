@@ -4,7 +4,6 @@ from .models import Article
 
 class ArticleSerializer(ModelSerializer):
     class Meta:
-
         model = Article
         fields = (
             "uuid",
@@ -16,12 +15,15 @@ class ArticleSerializer(ModelSerializer):
             "updated_at",
             "slug_title",
             "likes",
+            "bookmarks",
+            "share_qty",
         )
         read_only_fields = (
             "uuid",
             "author",
-            "slug_title",
             "likes",
+            "bookmarks",
+            "share_qty",
             "created_at",
             "updated_at",
         )
