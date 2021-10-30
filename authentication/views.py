@@ -21,7 +21,7 @@ from extensions.sms import generate_random_code
 User = get_user_model()
 
 
-class SendCode(CreateAPIView):
+class SendCodeAPIView(CreateAPIView):
     serializer_class = SendCodeSerializer
 
     def create(self, request, *args, **kwargs):
@@ -68,7 +68,7 @@ class SendCode(CreateAPIView):
             )
 
 
-class Login(LoginView):
+class LoginAPIView(LoginView):
     serializer_class = LoginSerializer
 
     def login(self):
@@ -112,12 +112,12 @@ class Login(LoginView):
         )
 
 
-class UserDetails(UserDetailsView):
+class UserDetailsAPIView(UserDetailsView):
     serializer_class = UserDetailsSerializer
     permission_classes = [IsAuthenticated]
 
 
-class UserProfile(RetrieveAPIView):
+class UserProfileAPIView(RetrieveAPIView):
     queryset = User.objects.all()
     lookup_field = "uuid"
 
@@ -130,12 +130,12 @@ class UserProfile(RetrieveAPIView):
         return UserProfileLimitedSerializer
 
 
-class UserLike(CreateAPIView):
+class UserLikeAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = User.objects.all()
     lookup_field = "uuid"
 
-    def post(self, request, *args, **kwargs):
+    def create(self, request, *args, **kwargs):
         user_profile = self.get_object()
         user = request.user
         if user in user_profile.liked_by.all():
@@ -145,12 +145,12 @@ class UserLike(CreateAPIView):
         return Response(status=status.HTTP_200_OK)
 
 
-class UserBookmark(CreateAPIView):
+class UserBookmarkAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = User.objects.all()
     lookup_field = "uuid"
 
-    def post(self, request, *args, **kwargs):
+    def create(self, request, *args, **kwargs):
         user_profile = self.get_object()
         user = request.user
         if user in user_profile.bookmarked_by.all():
@@ -160,12 +160,12 @@ class UserBookmark(CreateAPIView):
         return Response(status=status.HTTP_200_OK)
 
 
-class UserShare(CreateAPIView):
+class UserShareAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = User.objects.all()
     lookup_field = "uuid"
-
-    def post(self, request, *args, **kwargs):
+    
+    def create(self, request, *args, **kwargs):
         profile = self.get_object()
         profile.share_qty += 1
         profile.save()

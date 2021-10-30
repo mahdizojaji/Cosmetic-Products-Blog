@@ -27,4 +27,3 @@ class ArticleSerializer(ModelSerializer):
             "created_at",
             "updated_at",
         )
-        lookup_field = "uuid"

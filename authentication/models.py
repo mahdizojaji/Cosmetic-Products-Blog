@@ -18,6 +18,9 @@ from django.db.models import (
     ManyToManyField,
 )
 
+from django.contrib.auth import get_user_model
+from config.settings import PHONE_NUMBER_PATTERN
+
 
 class UserManager(BaseUserManager):
     def create_user(
@@ -59,8 +62,10 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     uuid = UUIDField(verbose_name="UUID", default=uuid.uuid4)
     phone_number_validator = RegexValidator(
-        regex=r"^\+989\d{9}$", message="Phone number must be entered."
+        regex=PHONE_NUMBER_PATTERN, message="Phone number must be entered."
     )
+    #r"^\+989\d{9}$"
+
     phone_number = CharField(
         validators=[phone_number_validator],
         max_length=13,
@@ -73,14 +78,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     birth_date = DateField(null=True, blank=True)
     fname = CharField(max_length=30, null=True, blank=True)
     lname = CharField(max_length=30, null=True, blank=True)
-    avatar_img = ImageField(upload_to=None, height_field=None, width_field=None)
-    cover_img = ImageField(upload_to=None, height_field=None, width_field=None)
+    avatar_img = ImageField(upload_to="images/users/avatars/", height_field=None, width_field=None)
+    cover_img = ImageField(upload_to="images/users/covers/", height_field=None, width_field=None)
     province = CharField(max_length=30)
     city = CharField(max_length=30)
     vip_expire = BigIntegerField(default=0, blank=True)
-    liked_by = ManyToManyField("authentication.User", related_name="user_liked_by")
+    liked_by = ManyToManyField(get_user_model(), related_name="user_liked_by")
     bookmarked_by = ManyToManyField(
-        "authentication.User", related_name="user_bookmarked_by"
+        get_user_model(), related_name="user_bookmarked_by"
     )
     share_qty = BigIntegerField(default=0, blank=True)
     
@@ -100,10 +105,4 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     def __str__(self):
-        return self.phone_number
-
-    def get_full_name(self):
-        return self.phone_number
-
-    def get_short_name(self):
         return self.phone_number

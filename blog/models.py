@@ -14,18 +14,20 @@ from django.db.models import (
 from django.db.models.fields import UUIDField
 from django.db.models.fields.related import ForeignKey
 from django.utils.text import slugify
+from django.contrib.auth import get_user_model
+
 
 
 class Article(Model):
     uuid = UUIDField(verbose_name="UUID", default=uuid4)
-    author = ForeignKey("authentication.User", on_delete=CASCADE)
+    author = ForeignKey(get_user_model(), on_delete=CASCADE)
     title = CharField(max_length=50, unique=True)
     content = TextField()
     slug_title = SlugField(unique=True, allow_unicode=True)
     image = ImageField()
 
-    likes = ManyToManyField("authentication.User", related_name="article_likes")
-    bookmarks = ManyToManyField("authentication.User", related_name="article_bookmarks")
+    likes = ManyToManyField(get_user_model(), related_name="article_likes")
+    bookmarks = ManyToManyField(get_user_model(), related_name="article_bookmarks")
     share_qty = BigIntegerField(default=0, blank=True)
 
     created_at = DateTimeField(auto_now_add=True)

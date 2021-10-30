@@ -56,7 +56,7 @@ class UserProfileFullSerializer(ModelSerializer):
             "vip_expire",
             "is_superuser",
         )
-        ReadOnlyField = "__all__"
+        read_only_fields = "__all__"
 
 
 class UserProfileLimitedSerializer(ModelSerializer):
@@ -75,4 +75,4 @@ class UserProfileLimitedSerializer(ModelSerializer):
             "rates",
             "share_qty",
         )
-        ReadOnlyField = "__all__"
+        read_only_fields = "__all__"

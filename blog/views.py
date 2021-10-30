@@ -7,7 +7,6 @@ from rest_framework.generics import (
     RetrieveUpdateDestroyAPIView,
     CreateAPIView,
 )
-from django_filters import rest_framework as filters
 
 
 from authentication.permissions import OwnerAndAdminOrReadOnly, OwnerAndAdmin
@@ -17,11 +16,10 @@ from .models import Article
 User = get_user_model()
 
 # Create &  List Articles
-class ArticleList(ListCreateAPIView):
+class ArticleListAPIView(ListCreateAPIView):
     queryset = Article.objects.all().order_by("-created_at")
     serializer_class = ArticleSerializer
     permission_classes = [IsAuthenticated]
-    filter_backends = (filters.DjangoFilterBackend,)
     filterset_fields = (
         "author",
         "title",
@@ -34,7 +32,7 @@ class ArticleList(ListCreateAPIView):
 
 
 # Retrieve, Update & Delete Articles
-class ArticleDetails(RetrieveUpdateDestroyAPIView):
+class ArticleDetailsAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
     permission_classes = [OwnerAndAdminOrReadOnly]
@@ -42,7 +40,7 @@ class ArticleDetails(RetrieveUpdateDestroyAPIView):
 
 
 # Like & Unlike an Article
-class ArticleLike(CreateAPIView):
+class ArticleLikeAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Article.objects.all()
     lookup_field = "uuid"
@@ -58,7 +56,7 @@ class ArticleLike(CreateAPIView):
 
 
 # Bookmark & Unbookmark an Article
-class ArticleBookmark(CreateAPIView):
+class ArticleBookmarkAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Article.objects.all()
     lookup_field = "uuid"
@@ -74,7 +72,7 @@ class ArticleBookmark(CreateAPIView):
 
 
 # Increase an Article's share
-class ArticleShare(CreateAPIView):
+class ArticleShareAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Article.objects.all()
     lookup_field = "uuid"

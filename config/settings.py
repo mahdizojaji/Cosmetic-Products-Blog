@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from datetime import timedelta
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -171,26 +172,6 @@ REST_USE_JWT = True
 JWT_AUTH_COOKIE = "my-app-auth"
 JWT_AUTH_REFRESH_COOKIE = "my-refresh-token"
 
-# REDIS
-REDIS = {
-    "HOST": os.environ["REDIS_HOST"],
-    "PORT": int(os.environ["REDIS_PORT"]),
-    "DB": os.environ["REDIS_DB"],
-    # "PASSWORD": os.environ.get("REDIS_PASSWORD"),
-}
-
-# CACHES
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": f"redis://{REDIS['HOST']}:{REDIS['PORT']}/{REDIS['DB']}",
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        },
-    }
-}
-SESSION_ENGINE = "django.contrib.sessions.backends.cache"
-SESSION_CACHE_ALIAS = "default"
 
 OTP_EXPIRE = int(os.environ["OTP_EXPIRE"])  # per minutes
 
@@ -205,11 +186,9 @@ SMS = {
 
 AUTH_USER_MODEL = "authentication.User"
 
-
-# temp configs for test
-from datetime import timedelta
-
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=50),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=int(os.environ["ACCESS_TOKEN_LIFETIME"])),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=int(os.environ["REFRESH_TOKEN_LIFETIME"])),
 }
+
+PHONE_NUMBER_PATTERN = os.environ["PHONE_NUMBER_PATTERN"]
