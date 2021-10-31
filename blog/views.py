@@ -9,7 +9,7 @@ from rest_framework.generics import (
 )
 
 
-from authentication.permissions import OwnerAndAdminOrReadOnly, OwnerAndAdmin
+from authentication.permissions import OwnerAndAdminOrReadOnly
 from .serializers import ArticleSerializer
 from .models import Article
 

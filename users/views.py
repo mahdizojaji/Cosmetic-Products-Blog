@@ -4,20 +4,18 @@ from rest_framework.generics import CreateAPIView, RetrieveAPIView
 from rest_framework.response import Response
 from dj_rest_auth.views import UserDetailsView
 from rest_framework.permissions import IsAuthenticated
-
-from authentication.permissions import OwnerAndAdmin, OwnerAndAdminOrReadOnly
-from .serializers import UserDetailsSerializer, UserProfileSerializer
+from .serializers import UserSerializer
 
 User = get_user_model()
 
 
 class UserDetailsAPIView(UserDetailsView):
-    serializer_class = UserDetailsSerializer
+    serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
 
 
 class UserProfileAPIView(RetrieveAPIView):
-    serializer_class = UserProfileSerializer
+    serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
     queryset = User.objects.all()
     lookup_field = "uuid"
