@@ -15,12 +15,12 @@ from .serializers import (
 User = get_user_model()
 
 
-class UserDetailsAPIView(UserDetailsView):
+class UserDetailsRetrieveUpdateAPIView(UserDetailsView):
     serializer_class = UserDetailsSerializer
     permission_classes = [IsAuthenticated]
 
 
-class UserProfileAPIView(RetrieveAPIView):
+class UserRetrieveAPIView(RetrieveAPIView):
     queryset = User.objects.all()
     lookup_field = "uuid"
 
@@ -63,7 +63,7 @@ class UserBookmarkAPIView(CreateAPIView):
         return Response(status=status.HTTP_200_OK)
 
 
-class UserShareAPIView(CreateAPIView):
+class UserIncreaseShareAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = User.objects.all()
     lookup_field = "uuid"
