@@ -15,9 +15,11 @@ from .models import Article
 
 User = get_user_model()
 
-# Create &  List Articles
+
 class ArticleListAPIView(ListCreateAPIView):
-    queryset = Article.objects.all().order_by("-created_at")
+    """Create &  List Articles
+    """
+    queryset = Article.objects.all()
     serializer_class = ArticleSerializer
     permission_classes = [IsAuthenticated]
     filterset_fields = (
@@ -26,6 +28,10 @@ class ArticleListAPIView(ListCreateAPIView):
         "content",
         "slug_title",
     )
+
+    def filter_queryset(self, queryset):
+        queryset = super().filter_queryset(queryset)
+        return queryset.order_by("-created_at")
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
