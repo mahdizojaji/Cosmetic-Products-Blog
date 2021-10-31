@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "dj_rest_auth",
     "django_filters",
     # Django Local Apps
+    "users.apps.UsersConfig",
     "authentication.apps.AuthenticationConfig",
     "blog.apps.BlogConfig",
     # Local Packages
@@ -184,7 +185,7 @@ SMS = {
     "TEMPLATE": os.environ.get("SMS_TEMPLATE_NAME", ""),
 }
 
-AUTH_USER_MODEL = "authentication.User"
+AUTH_USER_MODEL = "users.User"
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=int(os.environ["ACCESS_TOKEN_LIFETIME"])),

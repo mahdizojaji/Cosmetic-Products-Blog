@@ -45,7 +45,7 @@ class ArticleLikeAPIView(CreateAPIView):
     queryset = Article.objects.all()
     lookup_field = "uuid"
 
-    def post(self, request, *args, **kwargs):
+    def create(self, request, *args, **kwargs):
         article = self.get_object()
         user = request.user
         if user in article.likes.all():
@@ -61,7 +61,7 @@ class ArticleBookmarkAPIView(CreateAPIView):
     queryset = Article.objects.all()
     lookup_field = "uuid"
 
-    def post(self, request, *args, **kwargs):
+    def create(self, request, *args, **kwargs):
         article = self.get_object()
         user = request.user
         if user in article.bookmarks.all():
@@ -77,7 +77,7 @@ class ArticleShareAPIView(CreateAPIView):
     queryset = Article.objects.all()
     lookup_field = "uuid"
 
-    def post(self, request, *args, **kwargs):
+    def create(self, request, *args, **kwargs):
         article = self.get_object()
         article.share_qty += 1
         article.save()
