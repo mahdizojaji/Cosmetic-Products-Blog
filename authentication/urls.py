@@ -9,6 +9,6 @@ app_name = "authentication"
 urlpatterns = [
     path("send_code/", SendCodeAPIView.as_view(), name="send_code"),
     path("login/", LoginAPIView.as_view(), name="login"),
-    path("token/refresh/", get_refresh_view().as_view(), name="token_refresh"),
-    path("token/verify/", TokenVerifyView.as_view(), name="token_verify"),
+    path("refresh/", get_refresh_view().as_view(), name="token_refresh"),
+    path("verify/", TokenVerifyView.as_view(), name="token_verify"),
 ]

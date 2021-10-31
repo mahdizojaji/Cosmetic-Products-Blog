@@ -15,9 +15,11 @@ from .models import Article
 
 User = get_user_model()
 
-# Create &  List Articles
-class ArticleListAPIView(ListCreateAPIView):
-    queryset = Article.objects.all().order_by("-created_at")
+
+class ArticleListCreateAPIView(ListCreateAPIView):
+    """Create &  List Articles
+    """
+    queryset = Article.objects.all()
     serializer_class = ArticleSerializer
     permission_classes = [IsAuthenticated]
     filterset_fields = (
@@ -27,20 +29,26 @@ class ArticleListAPIView(ListCreateAPIView):
         "slug_title",
     )
 
+    def filter_queryset(self, queryset):
+        queryset = super().filter_queryset(queryset)
+        return queryset.order_by("-created_at")
+
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
 
-# Retrieve, Update & Delete Articles
-class ArticleDetailsAPIView(RetrieveUpdateDestroyAPIView):
+class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
+    """Retrieve, Update & Delete Articles
+    """
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
     permission_classes = [OwnerAndAdminOrReadOnly]
     lookup_field = "uuid"
 
 
-# Like & Unlike an Article
 class ArticleLikeAPIView(CreateAPIView):
+    """Like & Unlike an Article
+    """
     permission_classes = [IsAuthenticated]
     queryset = Article.objects.all()
     lookup_field = "uuid"
@@ -55,8 +63,9 @@ class ArticleLikeAPIView(CreateAPIView):
         return Response(status=status.HTTP_200_OK)
 
 
-# Bookmark & Unbookmark an Article
 class ArticleBookmarkAPIView(CreateAPIView):
+    """Bookmark & Un-bookmark an Article
+    """
     permission_classes = [IsAuthenticated]
     queryset = Article.objects.all()
     lookup_field = "uuid"
@@ -72,7 +81,7 @@ class ArticleBookmarkAPIView(CreateAPIView):
 
 
 # Increase an Article's share
-class ArticleShareAPIView(CreateAPIView):
+class ArticleIncreaseShareAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Article.objects.all()
     lookup_field = "uuid"
