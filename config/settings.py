@@ -173,6 +173,9 @@ REST_USE_JWT = True
 JWT_AUTH_COOKIE = "my-app-auth"
 JWT_AUTH_REFRESH_COOKIE = "my-refresh-token"
 
+REST_AUTH_SERIALIZERS = {
+    "USER_DETAILS_SERIALIZER": "authentication.serializers.LoginUserDetailsSerializer",
+}
 
 OTP_EXPIRE = int(os.environ["OTP_EXPIRE"])  # per minutes
 
@@ -188,7 +191,9 @@ SMS = {
 AUTH_USER_MODEL = "users.User"
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=int(os.environ["ACCESS_TOKEN_LIFETIME"])),
+    "ACCESS_TOKEN_LIFETIME": timedelta(
+        minutes=int(os.environ["ACCESS_TOKEN_LIFETIME"])
+    ),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=int(os.environ["REFRESH_TOKEN_LIFETIME"])),
 }
 
