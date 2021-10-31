@@ -59,12 +59,47 @@ class UserManager(BaseUserManager):
         return user
 
 
+iran_provinces = (
+    (1, "آذربایجان شرقی"),
+    (2, "آذربایجان غربی"),
+    (3, "اردبیل"),
+    (4, "اصفهان"),
+    (5, "البرز"),
+    (6, "ایلام"),
+    (7, "بوشهر"),
+    (8, "تهران"),
+    (9, "چهارمحال و بختیاری"),
+    (10, "خراسان جنوبی"),
+    (11, "خراسان رضوی"),
+    (12, "خراسان شمالی"),
+    (13, "خوزستان"),
+    (14, "زنجان"),
+    (15, "سمنان"),
+    (16, "سیستان و بلوچستان"),
+    (17, "فارس"),
+    (18, "قزوین"),
+    (19, "قم"),
+    (20, "کردستان"),
+    (21, "کرمان"),
+    (22, "کرمانشاه"),
+    (23, "کهگیلویه و بویراحمد"),
+    (24, "گلستان"),
+    (25, "لرستان"),
+    (26, "گیلان"),
+    (27, "مازندران"),
+    (28, "مرکزی"),
+    (29, "هرمزگان"),
+    (30, "همدان"),
+    (31, "یزد"),
+)
+
+
 class User(AbstractBaseUser, PermissionsMixin):
     uuid = UUIDField(verbose_name="UUID", default=uuid.uuid4)
     phone_number_validator = RegexValidator(
         regex=PHONE_NUMBER_PATTERN, message="Phone number must be entered."
     )
-    #r"^\+989\d{9}$"
+    # r"^\+989\d{9}$"
 
     phone_number = CharField(
         validators=[phone_number_validator],
@@ -78,17 +113,21 @@ class User(AbstractBaseUser, PermissionsMixin):
     birth_date = DateField(null=True, blank=True)
     fname = CharField(max_length=30, null=True, blank=True)
     lname = CharField(max_length=30, null=True, blank=True)
-    avatar_img = ImageField(upload_to="images/users/avatars/", height_field=None, width_field=None)
-    cover_img = ImageField(upload_to="images/users/covers/", height_field=None, width_field=None)
-    province = CharField(max_length=30)
-    city = CharField(max_length=30)
+    avatar_img = ImageField(
+        upload_to="images/users/avatars/", height_field=None, width_field=None
+    )
+    cover_img = ImageField(
+        upload_to="images/users/covers/", height_field=None, width_field=None
+    )
+    province = CharField(max_length=30, choices=iran_provinces, null=True)
+    city = CharField(max_length=30, null=True)
     vip_expire = BigIntegerField(default=0, blank=True)
-    liked_by = ManyToManyField(get_user_model(), related_name="user_liked_by")
+    liked_by = ManyToManyField("authentication.User", related_name="liked_users")
     bookmarked_by = ManyToManyField(
-        get_user_model(), related_name="user_bookmarked_by"
+        "authentication.User", related_name="bookmarked_users"
     )
     share_qty = BigIntegerField(default=0, blank=True)
-    
+
     ### this isnt approved yet ###
     ##############################################
     rates = BigIntegerField(default=0, blank=True)
