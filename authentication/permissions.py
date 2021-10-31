@@ -15,5 +15,6 @@ class OwnerAndAdmin(IsAuthenticated):
         return False
 
 
+
 class OwnerAndAdminOrReadOnly(IsAuthenticated):
     pass

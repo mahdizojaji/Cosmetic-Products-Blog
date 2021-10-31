@@ -6,11 +6,7 @@ from dj_rest_auth.views import UserDetailsView
 from rest_framework.permissions import IsAuthenticated
 
 from authentication.permissions import OwnerAndAdmin, OwnerAndAdminOrReadOnly
-from .serializers import (
-    UserDetailsSerializer,
-    UserProfileFullSerializer,
-    UserProfileLimitedSerializer,
-)
+from .serializers import UserDetailsSerializer, UserProfileSerializer
 
 User = get_user_model()
 
@@ -21,16 +17,10 @@ class UserDetailsAPIView(UserDetailsView):
 
 
 class UserProfileAPIView(RetrieveAPIView):
+    serializer_class = UserProfileSerializer
+    permission_classes = [IsAuthenticated]
     queryset = User.objects.all()
     lookup_field = "uuid"
-
-    def get_serializer_class(self):
-        if OwnerAndAdmin().has_object_permission(
-            request=self.request, view=self, obj=self.get_object()
-        ):
-            return UserProfileFullSerializer
-
-        return UserProfileLimitedSerializer
 
 
 class UserLikeAPIView(CreateAPIView):
