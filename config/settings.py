@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from datetime import timedelta
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -47,8 +48,11 @@ INSTALLED_APPS = [
     # ThirdParty Packages
     "rest_framework",
     "dj_rest_auth",
+    "django_filters",
     # Django Local Apps
+    "users.apps.UsersConfig",
     "authentication.apps.AuthenticationConfig",
+    "blog.apps.BlogConfig",
     # Local Packages
     "extensions",
 ]
@@ -159,43 +163,34 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": ("dj_rest_auth.jwt_auth.JWTCookieAuthentication",)
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "dj_rest_auth.jwt_auth.JWTCookieAuthentication",
+    ),
+    "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
 }
 
 REST_USE_JWT = True
 JWT_AUTH_COOKIE = "my-app-auth"
 JWT_AUTH_REFRESH_COOKIE = "my-refresh-token"
 
-# REDIS
-REDIS = {
-    "HOST": os.environ["REDIS_HOST"],
-    "PORT": int(os.environ["REDIS_PORT"]),
-    "DB": os.environ["REDIS_DB"],
-    # "PASSWORD": os.environ.get("REDIS_PASSWORD"),
+REST_AUTH_SERIALIZERS = {
+    "USER_DETAILS_SERIALIZER": "authentication.serializers.LoginUserDetailsSerializer",
 }
 
-# CACHES
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": f"redis://{REDIS['HOST']}:{REDIS['PORT']}/{REDIS['DB']}",
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        },
-    }
-}
-SESSION_ENGINE = "django.contrib.sessions.backends.cache"
-SESSION_CACHE_ALIAS = "default"
-
-OTP_EXPIRE = 5  # per minutes
+OTP_EXPIRE = int(os.environ["OTP_EXPIRE"])  # per minutes
 
 SMS = {
-    "API-KEY": os.environ["SMS_API_KEY"],
-    "OTP_LENGTH": os.environ["SMS_OTP_LENGTH"],
-    "API_VERSION": os.environ["SMS_API_VERSION"],
-    "API_HOST": os.environ["SMS_API_HOST"],
+    "API_KEY": os.environ["SMS_API_KEY"],
+    "OTP_LENGTH": int(os.environ["SMS_OTP_LENGTH"]),
     "DEBUG_MODE": bool(int(os.environ.get("SMS_DEBUG_MODE", "0"))),
-    "TEMPLATE": os.environ.get("SMS_TEMPLATE_NAME", ""),
+    "TEMPLATE": os.environ["SMS_TEMPLATE_NAME"],
 }
 
-AUTH_USER_MODEL = "authentication.User"
+AUTH_USER_MODEL = "users.User"
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=int(os.environ["ACCESS_TOKEN_LIFETIME"])),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=int(os.environ["REFRESH_TOKEN_LIFETIME"])),
+}
+
+PHONE_NUMBER_PATTERN = os.environ["PHONE_NUMBER_PATTERN"]

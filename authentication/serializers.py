@@ -1,5 +1,9 @@
+from rest_framework import fields
 from rest_framework.serializers import ModelSerializer
-from .models import User
+from django.contrib.auth import get_user_model
+from dj_rest_auth.serializers import UserDetailsSerializer
+
+User = get_user_model()
 
 
 class SendCodeSerializer(ModelSerializer):
@@ -16,8 +20,10 @@ class LoginSerializer(ModelSerializer):
         extra_kwargs = {"phone_number": {"validators": [User.phone_number_validator]}}
 
 
-class UserDetailsSerializer(ModelSerializer):
+class LoginUserDetailsSerializer(ModelSerializer):
     class Meta:
         model = User
-        fields = ("uuid", "phone_number", "email")
-        read_only_fields = ("phone_number",)
+        fields = ("uuid","phone_number")
+        read_only_fields = ("uuid","phone_number")
+
+        
