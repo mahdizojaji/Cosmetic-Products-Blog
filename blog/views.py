@@ -56,7 +56,7 @@ class ArticleLikeAPIView(CreateAPIView):
     def create(self, request, *args, **kwargs):
         article = self.get_object()
         user = request.user
-        if user in article.likes.all():
+        if user in article.likes.all():  # TODO: Fix Query
             article.likes.remove(user)
         else:
             article.likes.add(user)
@@ -73,7 +73,7 @@ class ArticleBookmarkAPIView(CreateAPIView):
     def create(self, request, *args, **kwargs):
         article = self.get_object()
         user = request.user
-        if user in article.bookmarks.all():
+        if user in article.bookmarks.all():  # TODO: Fix Query
             article.bookmarks.remove(user)
         else:
             article.bookmarks.add(user)

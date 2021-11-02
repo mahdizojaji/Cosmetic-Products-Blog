@@ -101,7 +101,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     phone_number_validator = RegexValidator(
         regex=PHONE_NUMBER_PATTERN, message="Phone number must be entered."
     )
-    # r"^\+989\d{9}$"
 
     phone_number = CharField(
         validators=[phone_number_validator],
@@ -128,7 +127,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     bookmarked_by = ManyToManyField("self", related_name="bookmarked_users")
     share_qty = BigIntegerField(default=0, blank=True)
 
-    ### this isnt approved yet ###
+    # this isn't approved yet ###
     ##############################################
     rates = BigIntegerField(default=0, blank=True)
     ###############################################
