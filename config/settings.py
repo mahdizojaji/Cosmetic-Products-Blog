@@ -180,12 +180,10 @@ REST_AUTH_SERIALIZERS = {
 OTP_EXPIRE = int(os.environ["OTP_EXPIRE"])  # per minutes
 
 SMS = {
-    "API-KEY": os.environ["SMS_API_KEY"],
-    "OTP_LENGTH": os.environ["SMS_OTP_LENGTH"],
-    "API_VERSION": os.environ["SMS_API_VERSION"],
-    "API_HOST": os.environ["SMS_API_HOST"],
+    "API_KEY": os.environ["SMS_API_KEY"],
+    "OTP_LENGTH": int(os.environ["SMS_OTP_LENGTH"]),
     "DEBUG_MODE": bool(int(os.environ.get("SMS_DEBUG_MODE", "0"))),
-    "TEMPLATE": os.environ.get("SMS_TEMPLATE_NAME", ""),
+    "TEMPLATE": os.environ["SMS_TEMPLATE_NAME"],
 }
 
 AUTH_USER_MODEL = "users.User"

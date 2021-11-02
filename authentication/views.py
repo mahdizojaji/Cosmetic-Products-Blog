@@ -1,13 +1,14 @@
 from django.contrib.auth import get_user_model, authenticate
-from rest_framework import status
+from rest_framework import status, serializers
+from rest_framework.request import Request
 from rest_framework.generics import CreateAPIView
-from config.settings import OTP_EXPIRE, SMS
+from config import settings
 from rest_framework.response import Response
 from dj_rest_auth.views import LoginView
 from dj_rest_auth.utils import jwt_encode
 from django.utils import timezone
 from .serializers import SendCodeSerializer, LoginSerializer
-from extensions.sms import generate_random_code
+from extensions.sms import generate_random_code, send_otp_sms
 
 User = get_user_model()
 
@@ -16,33 +17,34 @@ class SendCodeAPIView(CreateAPIView):
     serializer_class = SendCodeSerializer
 
     def create(self, request, *args, **kwargs):
-        # generating random code
-        otp = "123456" if SMS["DEBUG_MODE"] else str(generate_random_code())
         # validating serializer
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         # get or create user
-        user, _ = User.objects.get_or_create(
-            phone_number=serializer.validated_data["phone_number"]
-        )
-        # # # # # # # # # # # # # # # # # #
-        # send_sms(user.phone_number, otp)
-        sms_success, sms_error = True, None
-        # # # # # # # # # # # # # # # # # #
-        expire_otp = OTP_EXPIRE * 60
+        user, _ = User.objects.get_or_create(phone_number=serializer.validated_data["phone_number"])
+        # generating random code
+        # TODO: doest not set password for staff users
+        if settings.SMS["DEBUG_MODE"]:
+            otp = "123456"
+            sms_success, sms_error = True, None
+        else:
+            otp = f'{generate_random_code()}'
+            sms_response = send_otp_sms(user.phone_number, otp).json()
+            sms_success = True if sms_response.get('result', {}).get('code') == 200 else False
+            sms_error = None if sms_success else sms_response.get('result', {}).get('message')
         # set code expire time
-        user.code_expire = int(timezone.now().timestamp()) + expire_otp
+        user.code_expire = int(timezone.now().timestamp() + (settings.OTP_EXPIRE * 60))
         # set otp as user password
         user.set_password(otp)
         user.save()
-        # responce based on sms_succes
+        # response based on sms success
         if sms_success:
             # success response
             return Response(
                 {
                     "ok": True,
                     "phone_number": user.phone_number,
-                    "expire": expire_otp,
+                    "expire": user.code_expire,
                 },
                 status=status.HTTP_201_CREATED,
                 headers=self.get_success_headers(serializer.data),
@@ -60,13 +62,16 @@ class SendCodeAPIView(CreateAPIView):
 
 
 class LoginAPIView(LoginView):
+    refresh_token: str
+    request: Request
+    serializer: serializers.Serializer
     serializer_class = LoginSerializer
 
     def login(self):
         self.access_token, self.refresh_token = jwt_encode(self.user)
         self.process_login()
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request: Request, *args, **kwargs):
         self.request = request
         self.serializer = self.get_serializer(data=self.request.data)
         self.serializer.is_valid(raise_exception=True)
@@ -82,7 +87,6 @@ class LoginAPIView(LoginView):
             if user.code_expire > int(timezone.now().timestamp()):
                 self.user = user
                 self.login()
-                # TODO: replace 'id' key in responce with user 'UUID' field
                 # THE HAPPY ENDING ~>
                 return self.get_response()
             else:
