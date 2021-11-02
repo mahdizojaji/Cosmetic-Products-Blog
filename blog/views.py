@@ -17,8 +17,8 @@ User = get_user_model()
 
 
 class ArticleListCreateAPIView(ListCreateAPIView):
-    """Create &  List Articles
-    """
+    """Create &  List Articles"""
+
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
     permission_classes = [IsAuthenticated]
@@ -38,17 +38,34 @@ class ArticleListCreateAPIView(ListCreateAPIView):
 
 
 class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
-    """Retrieve, Update & Delete Articles
-    """
+    """Retrieve, Update & Delete Articles"""
+
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
     permission_classes = [OwnerAndAdminOrReadOnly]
     lookup_field = "uuid"
 
+    def perform_update(self, serializer):
+        admin = self.request.user.is_superuser
+
+        if (serializer.instance.status == Article.PENDING) and (not admin):
+            return Response(
+                {
+                    "error": "article-pending",
+                    "message": "You can't update a pending article",
+                    "detail": "Article is already pending.",
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        elif serializer.instance.status == Article.PUBLISHED:
+            pass
+        else:
+            serializer.save()
+
 
 class ArticleLikeAPIView(CreateAPIView):
-    """Like & Unlike an Article
-    """
+    """Like & Unlike an Article"""
+
     permission_classes = [IsAuthenticated]
     queryset = Article.objects.all()
     lookup_field = "uuid"
@@ -64,8 +81,8 @@ class ArticleLikeAPIView(CreateAPIView):
 
 
 class ArticleBookmarkAPIView(CreateAPIView):
-    """Bookmark & Un-bookmark an Article
-    """
+    """Bookmark & Un-bookmark an Article"""
+
     permission_classes = [IsAuthenticated]
     queryset = Article.objects.all()
     lookup_field = "uuid"

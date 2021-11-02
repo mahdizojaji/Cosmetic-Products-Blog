@@ -9,26 +9,40 @@ from django.db.models import (
     SlugField,
     TextField,
     ImageField,
-    CASCADE
+    CASCADE,
+    DO_NOTHING,
+    OneToOneField,
+    UUIDField,
+    ForeignKey,
 )
-from django.db.models.fields import UUIDField
-from django.db.models.fields.related import ForeignKey
 from django.utils.text import slugify
 from django.contrib.auth import get_user_model
 
 
-
 class Article(Model):
+    DRAFT = 0
+    PENDING = 1
+    PUBLISHED = 2
+    status_choices = (
+        (DRAFT, "Draft"),
+        (PENDING, "Pending"),
+        (PUBLISHED, "Published"),
+    )
+
     uuid = UUIDField(verbose_name="UUID", default=uuid4)
     author = ForeignKey(get_user_model(), on_delete=CASCADE)
     title = CharField(max_length=50, unique=True)
     content = TextField()
-    slug_title = SlugField(unique=True, allow_unicode=True)
+    slug_title = SlugField(unique=True, allow_unicode=True, blank=True)
     image = ImageField()
 
     likes = ManyToManyField(get_user_model(), related_name="article_likes")
     bookmarks = ManyToManyField(get_user_model(), related_name="article_bookmarks")
     share_qty = BigIntegerField(default=0, blank=True)
+
+    status = CharField(max_length=10, choices=status_choices, default=DRAFT)
+
+    parent = OneToOneField("self", on_delete=DO_NOTHING, null=True, blank=True)
 
     created_at = DateTimeField(auto_now_add=True)
     updated_at = DateTimeField(auto_now=True)
