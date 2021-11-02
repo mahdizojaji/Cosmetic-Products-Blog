@@ -4,6 +4,7 @@ from django.db.models import (
     Model,
     ManyToManyField,
     BigIntegerField,
+    IntegerField,
     CharField,
     DateTimeField,
     SlugField,
@@ -13,7 +14,7 @@ from django.db.models import (
     DO_NOTHING,
     OneToOneField,
     UUIDField,
-    ForeignKey,
+    ForeignKey
 )
 from django.utils.text import slugify
 from django.contrib.auth import get_user_model
@@ -40,9 +41,11 @@ class Article(Model):
     bookmarks = ManyToManyField(get_user_model(), related_name="article_bookmarks")
     share_qty = BigIntegerField(default=0, blank=True)
 
-    status = CharField(max_length=10, choices=status_choices, default=DRAFT)
+    status = IntegerField(choices=status_choices, default=DRAFT)
 
-    parent = OneToOneField("self", on_delete=DO_NOTHING, null=True, blank=True)
+    original = OneToOneField(
+        "self", on_delete=DO_NOTHING, null=True, blank=True, related_name="clone"
+    )
 
     created_at = DateTimeField(auto_now_add=True)
     updated_at = DateTimeField(auto_now=True)

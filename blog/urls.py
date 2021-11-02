@@ -5,7 +5,8 @@ from .views import (
     ArticleRetrieveUpdateDestroyAPIView,
     ArticleLikeAPIView, 
     ArticleBookmarkAPIView, 
-    ArticleIncreaseShareAPIView
+    ArticleIncreaseShareAPIView,
+    ArticlePublishAPIView
 )
 
 app_name = "blog"
@@ -16,4 +17,5 @@ urlpatterns = [
     path("articles/like/<uuid:uuid>/", ArticleLikeAPIView.as_view(), name="articles_like"),
     path("articles/bookmark/<uuid:uuid>/", ArticleBookmarkAPIView.as_view(), name="articles_bookmark"),
     path("articles/share/<uuid:uuid>/", ArticleIncreaseShareAPIView.as_view(), name="articles_increase_share"),
+    path("articles/publish/<uuid:uuid>/", ArticlePublishAPIView.as_view(), name="articles_publish"),
 ]
