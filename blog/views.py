@@ -154,7 +154,7 @@ class ArticleBookmarkAPIView(CreateAPIView):
     def create(self, request, *args, **kwargs):
         article = self.get_object()
         user = request.user
-        if user in article.bookmarks.all():  # TODO: Fix Query
+        if Article.objects.filter(uuid=article.uuid, bookmarks__in=[user]).exists():
             article.bookmarks.remove(user)
         else:
             article.bookmarks.add(user)
