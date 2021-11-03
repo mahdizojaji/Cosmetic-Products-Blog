@@ -1,14 +1,15 @@
 from django.contrib.auth import get_user_model, authenticate
+from django.utils import timezone
 from rest_framework import status, serializers
 from rest_framework.request import Request
 from rest_framework.generics import CreateAPIView
-from config import settings
 from rest_framework.response import Response
 from dj_rest_auth.views import LoginView
 from dj_rest_auth.utils import jwt_encode
-from django.utils import timezone
+
 from .serializers import SendCodeSerializer, LoginSerializer
 from extensions.sms import generate_random_code, send_otp_sms
+from config import settings
 
 User = get_user_model()
 
@@ -21,17 +22,22 @@ class SendCodeAPIView(CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         # get or create user
-        user, _ = User.objects.get_or_create(phone_number=serializer.validated_data["phone_number"])
-        # generating random code
-        # TODO: doest not set password for staff users
+        user, _ = User.objects.get_or_create(
+            phone_number=serializer.validated_data["phone_number"]
+        )
         if settings.SMS["DEBUG_MODE"]:
             otp = "123456"
             sms_success, sms_error = True, None
         else:
-            otp = f'{generate_random_code()}'
+            # generating random code
+            otp = f"{generate_random_code()}"
             sms_response = send_otp_sms(user.phone_number, otp).json()
-            sms_success = True if sms_response.get('result', {}).get('code') == 200 else False
-            sms_error = None if sms_success else sms_response.get('result', {}).get('message')
+            sms_success = (
+                True if sms_response.get("result", {}).get("code") == 200 else False
+            )
+            sms_error = (
+                None if sms_success else sms_response.get("result", {}).get("message")
+            )
         # set code expire time
         user.code_expire = int(timezone.now().timestamp() + (settings.OTP_EXPIRE * 60))
         # set otp as user password
