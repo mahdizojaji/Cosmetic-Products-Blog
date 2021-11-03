@@ -34,6 +34,15 @@ class SendCodeAPIView(CreateAPIView):
                 },
                 status=status.HTTP_403_FORBIDDEN,
             )
+        if user.code_expire > int(timezone.now().timestamp()):
+            return Response(
+                {
+                    "error": "auth-sms",
+                    "message": "Failed to send SMS.",
+                    "detail": f"You have already sent SMS in the last {settings.OTP_EXPIRE} minutes",
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
         if settings.SMS["DEBUG_MODE"]:
             otp = "123456"
             sms_success, sms_error = True, None
