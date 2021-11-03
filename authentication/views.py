@@ -25,6 +25,15 @@ class SendCodeAPIView(CreateAPIView):
         user, _ = User.objects.get_or_create(
             phone_number=serializer.validated_data["phone_number"]
         )
+        if user.is_staff:
+            return Response(
+                {
+                    "error": "auth-sms",
+                    "message": "Failed to send SMS.",
+                    "detail": "You are not allowed to login with this phone number",
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
         if settings.SMS["DEBUG_MODE"]:
             otp = "123456"
             sms_success, sms_error = True, None
