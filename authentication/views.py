@@ -109,10 +109,10 @@ class LoginAPIView(LoginView):
         if user:
             # checking code expire time
             if user.code_expire > int(timezone.now().timestamp()):
-                user.set_unusable_password()
-                user.save()
                 self.user = user
                 self.login()
+                user.set_unusable_password()
+                user.save()
                 # THE HAPPY ENDING ~>
                 return self.get_response()
             else:
