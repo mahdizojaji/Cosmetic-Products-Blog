@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "users.apps.UsersConfig",
     "authentication.apps.AuthenticationConfig",
     "blog.apps.BlogConfig",
+    "comments.apps.CommentsConfig",
     # Local Packages
     "extensions",
 ]
