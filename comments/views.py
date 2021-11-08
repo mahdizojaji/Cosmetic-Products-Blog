@@ -18,16 +18,18 @@ from .models import Comment
 class CommentListCreateAbstractView(ListCreateAPIView):
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated]
+    lookup_field = "uuid"
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         comment = Comment(
-            content_object=serializer.instance,
+            content_object=self.get_object(),
             author=request.user,
             text=serializer.validated_data["text"],
             created_at=timezone.now(),
         )
+        comment.save()
 
         serializer = self.get_serializer(comment)
         headers = self.get_success_headers(serializer.data)
@@ -38,7 +40,7 @@ class CommentListCreateAbstractView(ListCreateAPIView):
         )
 
     def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(Comment.objects.all())
+        queryset = self.filter_queryset(self.get_object().comments.all())
 
         page = self.paginate_queryset(queryset)
         if page is not None:
