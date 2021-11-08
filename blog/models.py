@@ -26,16 +26,17 @@ class Article(Model):
     PUBLISHED = 2
     status_choices = (
         (DRAFT, "Draft"),
+        # TODO: Not all fields need to be complete in draft state & it should check in make publish API.
         (PENDING, "Pending"),
         (PUBLISHED, "Published"),
     )
 
-    uuid = UUIDField(verbose_name="UUID", default=uuid4)
-    author = ForeignKey(get_user_model(), on_delete=CASCADE)
-    title = CharField(max_length=50, unique=True)
+    uuid = UUIDField(verbose_name="UUID", default=uuid4)  # TODO: make all uuid field as unique
+    author = ForeignKey(get_user_model(), on_delete=CASCADE)  # TODO: on_delete=SET_NULL
+    title = CharField(max_length=50, unique=True)  # TODO: title should not be unique
     content = TextField()
     slug_title = SlugField(unique=True, allow_unicode=True, blank=True)
-    image = ImageField()
+    image = ImageField()  # TODO: More images & videos should allow but only image can upload with this code.
 
     likes = ManyToManyField(get_user_model(), related_name="article_likes")
     bookmarks = ManyToManyField(get_user_model(), related_name="article_bookmarks")
