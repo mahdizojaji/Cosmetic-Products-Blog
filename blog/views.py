@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from rest_framework import status
-from rest_framework import response
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import (
@@ -15,7 +14,13 @@ from authentication.permissions import OwnerAndAdmin, OwnerAndAdminOrReadOnly
 from .serializers import ArticleSerializer
 from .models import Article
 
+from comments.views import CommentListCreateAbstractView
+
 User = get_user_model()
+
+
+class ArticleCommentListCreateAPIView(CommentListCreateAbstractView):
+    queryset = Article.objects.all()
 
 
 class ArticleListCreateAPIView(ListCreateAPIView):

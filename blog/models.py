@@ -1,4 +1,5 @@
 from uuid import uuid4
+from django.contrib.contenttypes.models import ContentType
 
 from django.db.models import (
     Model,
@@ -18,6 +19,9 @@ from django.db.models import (
 )
 from django.utils.text import slugify
 from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.fields import GenericRelation
+
+from comments.models import Comment
 
 
 class Article(Model):
@@ -36,16 +40,14 @@ class Article(Model):
     content = TextField()
     slug_title = SlugField(unique=True, allow_unicode=True, blank=True)
     image = ImageField()
-
     likes = ManyToManyField(get_user_model(), related_name="article_likes")
     bookmarks = ManyToManyField(get_user_model(), related_name="article_bookmarks")
     share_qty = BigIntegerField(default=0, blank=True)
-
     status = IntegerField(choices=status_choices, default=DRAFT)
-
     original = OneToOneField(
         "self", on_delete=DO_NOTHING, null=True, blank=True, related_name="clone"
     )
+    comments = GenericRelation(Comment)
 
     created_at = DateTimeField(auto_now_add=True)
     updated_at = DateTimeField(auto_now=True)
