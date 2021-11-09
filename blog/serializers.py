@@ -18,6 +18,8 @@ class ArticleSerializer(ModelSerializer):
             "bookmarks",
             "share_qty",
             "status",
+            "rate",
+            "rate_counts",
             # ---
             "title",
             "content",
@@ -33,4 +35,6 @@ class ArticleSerializer(ModelSerializer):
             "bookmarks",
             "share_qty",
             "status",
+            "rate",
+            "rate_counts",
         )

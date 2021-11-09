@@ -23,31 +23,30 @@ class CommentListCreateAbstractView(ListCreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        obj = self.get_object()
         comment = Comment(
-            content_object=self.get_object(),
+            content_object=obj,
             author=request.user,
             text=serializer.validated_data["text"],
             rate=serializer.validated_data["rate"],
             created_at=timezone.now(),
         )
+        obj.set_rate(comment.rate)
         comment.save()
-
+        obj.save()
         serializer = self.get_serializer(comment)
-        headers = self.get_success_headers(serializer.data)
         return Response(
             serializer.data,
             status=status.HTTP_201_CREATED,
-            headers=headers,
+            headers=self.get_success_headers(serializer.data),
         )
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_object().comments.all())
-
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
-
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
