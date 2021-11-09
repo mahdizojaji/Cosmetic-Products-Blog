@@ -27,6 +27,7 @@ class CommentListCreateAbstractView(ListCreateAPIView):
             content_object=self.get_object(),
             author=request.user,
             text=serializer.validated_data["text"],
+            rate=serializer.validated_data["rate"],
             created_at=timezone.now(),
         )
         comment.save()
