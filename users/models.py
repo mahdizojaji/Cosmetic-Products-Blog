@@ -97,7 +97,7 @@ iran_provinces = (
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    uuid = UUIDField(verbose_name="UUID", default=uuid.uuid4)
+    uuid = UUIDField(verbose_name="UUID", default=uuid.uuid4, unique=True)
     phone_number_validator = RegexValidator(
         regex=PHONE_NUMBER_PATTERN, message="Phone number must be entered."
     )

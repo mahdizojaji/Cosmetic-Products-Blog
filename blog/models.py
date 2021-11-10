@@ -30,7 +30,7 @@ class Article(Model):
         (PUBLISHED, "Published"),
     )
 
-    uuid = UUIDField(verbose_name="UUID", default=uuid4)
+    uuid = UUIDField(verbose_name="UUID", default=uuid4, unique=True)
     author = ForeignKey(get_user_model(), on_delete=CASCADE)
     title = CharField(max_length=50, unique=True)
     content = TextField()
