@@ -19,7 +19,9 @@ class Comment(Model):
     uuid = UUIDField(verbose_name="UUID", default=uuid4, unique=True)
     text = CharField(max_length=100)
     author = ForeignKey(get_user_model(), on_delete=CASCADE, related_name="comments")
-    rate = SmallIntegerField(validators=[MaxValueValidator(5), MinValueValidator(1)])
+    rate = SmallIntegerField(
+        validators=[MaxValueValidator(5), MinValueValidator(1)], blank=True, null=True
+    )
     created_at = DateTimeField(auto_now_add=True)
 
     content_type = ForeignKey(

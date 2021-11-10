@@ -1,4 +1,4 @@
-from django.db.models.base import Model
+from django.db.models import Model
 from django.dispatch import receiver
 from django.db.models.signals import pre_save, post_delete
 
@@ -6,39 +6,49 @@ from .models import Comment
 from config.settings import RATE_MODELS
 
 
-def set_rate(obj: Model, value: int):
-    obj.rate_counts += 1
-    obj.rate_points += value
-    obj.rate = obj.rate_points / obj.rate_counts
+def apply_rate(obj: Model, value: int, unset: bool = False):
+    """Calculate rate for object based on UNSET argument
 
+    Args:
+        obj (Model): object to calculate rate for
+        value (int): value to add to rate_points
+        unset (bool, optional): flag for removing previous rate. Defaults to False.
+    """
+    if unset:
+        obj.rate_counts -= 1
+        obj.rate_points -= value
+    else:
+        obj.rate_counts += 1
+        obj.rate_points += value
 
-def unset_rate(obj: Model, value: int):
-    obj.rate_counts -= 1
-    obj.rate_points -= value
-    obj.rate = obj.rate_points / obj.rate_counts
+    if obj.rate_counts > 0:
+        obj.rate = obj.rate_points / obj.rate_counts
+    else:
+        obj.rate = 0
 
 
 @receiver(pre_save, sender=Comment)
-def apply_rate(sender, instance, created=False, **kwargs):
+def comment_pre_save(sender, instance, **kwargs):
     obj = instance.content_object
     if obj._meta.model_name not in RATE_MODELS:
+        # if object is not rateable we don't need to do anything.
         return
-
-    if not created:
-        org = Comment.objects.get(uuid=instance.uuid)
-        unset_rate(obj, org.rate)
-
-    set_rate(obj, instance.rate)
+    org = Comment.objects.filter(uuid=instance.uuid)
+    if org.exists():
+        org = org.first()
+        # if comment was updated first we need to remove previous rate ->
+        apply_rate(obj, org.rate, True)
+    # adding rate to object and save it ->
+    apply_rate(obj, instance.rate)
     obj.save()
-    # print("old:",org.rate)
-    # print("new:",instance.rate)
 
 
 @receiver(post_delete, sender=Comment)
-def clear_rate(sender, instance, **kwargs):
+def comment_post_delete(sender, instance, **kwargs):
     obj = instance.content_object
     if obj._meta.model_name not in RATE_MODELS:
+        # if object is not rateable we don't need to do anything.
         return
-
-    unset_rate(obj, instance.rate)
+    # adding rate to object and save it ->
+    apply_rate(obj, instance.rate, True)
     obj.save()
