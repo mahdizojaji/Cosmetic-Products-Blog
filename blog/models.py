@@ -1,6 +1,7 @@
 from uuid import uuid4
 
 from django.db import models
+from django.utils import timezone
 from django.utils.text import slugify
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
@@ -87,7 +88,7 @@ class Course(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.title, allow_unicode=True)
+        self.slug = slugify(f"{self.title} {int(timezone.now().timestamp())}", allow_unicode=True)
         super().save(*args, **kwargs)
 
     def __str__(self):
