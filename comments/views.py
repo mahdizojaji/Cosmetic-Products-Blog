@@ -48,10 +48,8 @@ class CommentListCreateAbstractView(ListCreateAPIView):
         return Response(serializer.data)
 
 
-"""
 class CommentRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
-    queryset = Article.objects.all()
+    queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     lookup_field = "uuid"
     permission_classes = [OwnerAndAdminOrReadOnly]
-"""
