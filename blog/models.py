@@ -12,7 +12,7 @@ from django.contrib.contenttypes.fields import GenericRelation, GenericForeignKe
 class MediaFile(models.Model):
     uuid = models.UUIDField(verbose_name="UUID", unique=True, default=uuid4)
     object_id = models.PositiveIntegerField()
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, limit_choices_to={'model__in': ['Course']})
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, limit_choices_to={'model__in': ['course']})
     content_object = GenericForeignKey('content_type', 'object_id')
     author = models.ForeignKey(to=get_user_model(), on_delete=models.DO_NOTHING, related_name='media_files')
 
