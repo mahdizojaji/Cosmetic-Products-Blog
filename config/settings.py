@@ -195,3 +195,5 @@ SIMPLE_JWT = {
 }
 
 PHONE_NUMBER_PATTERN = os.environ["PHONE_NUMBER_PATTERN"]
+
+RATE_MODELS = os.environ.get("RATE_MODELS", default="").strip('"').split()
