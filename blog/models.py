@@ -1,40 +1,22 @@
 from uuid import uuid4
 
-from django.contrib.contenttypes.fields import GenericRelation, GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
-from django.core.validators import MinValueValidator
-from django.db.models import (
-    Model,
-    ManyToManyField,
-    BigIntegerField,
-    IntegerField,
-    PositiveIntegerField,
-    CharField,
-    DateTimeField,
-    SlugField,
-    TextField,
-    ImageField,
-    CASCADE,
-    SET_NULL,
-    DO_NOTHING,
-    OneToOneField,
-    UUIDField,
-    ForeignKey,
-    BooleanField,
-)
+from django.db import models
 from django.utils.text import slugify
 from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericRelation, GenericForeignKey
 
 
-class MediaFile(Model):
-    uuid = UUIDField(verbose_name="UUID", unique=True, default=uuid4)
-    object_id = PositiveIntegerField()
-    content_type = ForeignKey(ContentType, on_delete=CASCADE, limit_choices_to={'model__in': ['Course']})
+class MediaFile(models.Model):
+    uuid = models.UUIDField(verbose_name="UUID", unique=True, default=uuid4)
+    object_id = models.PositiveIntegerField()
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, limit_choices_to={'model__in': ['Course']})
     content_object = GenericForeignKey('content_type', 'object_id')
-    author = ForeignKey(to=get_user_model(), on_delete=DO_NOTHING, related_name='media_files')
+    author = models.ForeignKey(to=get_user_model(), on_delete=models.DO_NOTHING, related_name='media_files')
 
 
-class Article(Model):
+class Article(models.Model):
     DRAFT = 0
     PENDING = 1
     PUBLISHED = 2
@@ -45,25 +27,25 @@ class Article(Model):
         (PUBLISHED, "Published"),
     )
 
-    uuid = UUIDField(verbose_name="UUID", default=uuid4)  # TODO: make all uuid field as unique
-    author = ForeignKey(get_user_model(), on_delete=CASCADE)  # TODO: on_delete=SET_NULL
-    title = CharField(max_length=50, unique=True)  # TODO: title should not be unique
-    content = TextField()
-    slug_title = SlugField(unique=True, allow_unicode=True, blank=True)
-    image = ImageField()  # TODO: More images & videos should allow but only image can upload with this code.
+    uuid = models.UUIDField(verbose_name="UUID", default=uuid4)  # TODO: make all uuid field as unique
+    author = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)  # TODO: on_delete=SET_NULL
+    title = models.CharField(max_length=50, unique=True)  # TODO: title should not be unique
+    content = models.TextField()
+    slug_title = models.SlugField(unique=True, allow_unicode=True, blank=True)
+    image = models.ImageField()  # TODO: More images & videos should allow but only image can upload with this code.
 
-    likes = ManyToManyField(get_user_model(), related_name="article_likes")
-    bookmarks = ManyToManyField(get_user_model(), related_name="article_bookmarks")
-    share_qty = BigIntegerField(default=0, blank=True)
+    likes = models.ManyToManyField(get_user_model(), related_name="article_likes")
+    bookmarks = models.ManyToManyField(get_user_model(), related_name="article_bookmarks")
+    share_qty = models.BigIntegerField(default=0, blank=True)
 
-    status = IntegerField(choices=status_choices, default=DRAFT)
+    status = models.IntegerField(choices=status_choices, default=DRAFT)
 
-    original = OneToOneField(
-        "self", on_delete=DO_NOTHING, null=True, blank=True, related_name="clone"
+    original = models.OneToOneField(
+        "self", on_delete=models.DO_NOTHING, null=True, blank=True, related_name="clone"
     )
 
-    created_at = DateTimeField(auto_now_add=True)
-    updated_at = DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.slug_title
@@ -74,7 +56,7 @@ class Article(Model):
         super(Article, self).save(*args, **kwargs)
 
 
-class Course(Model):
+class Course(models.Model):
     DRAFT = 0
     PENDING = 1
     PUBLISHED = 2
@@ -84,25 +66,25 @@ class Course(Model):
         (PUBLISHED, "Published"),
     )
     # same fields for online & offline courses:
-    uuid = UUIDField(verbose_name="UUID", unique=True, default=uuid4)
-    author = ForeignKey(verbose_name='Author', to=get_user_model(), on_delete=SET_NULL, null=True)
-    title = CharField(verbose_name='Title', max_length=255)
-    slug = SlugField(verbose_name='Slug', unique=True, allow_unicode=True, blank=True)
-    status = IntegerField(choices=status_choices, default=DRAFT)
-    content = TextField(verbose_name='Content', null=True, blank=True)
+    uuid = models.UUIDField(verbose_name="UUID", unique=True, default=uuid4)
+    author = models.ForeignKey(verbose_name='Author', to=get_user_model(), on_delete=models.SET_NULL, null=True)
+    title = models.CharField(verbose_name='Title', max_length=255)
+    slug = models.SlugField(verbose_name='Slug', unique=True, allow_unicode=True, blank=True)
+    status = models.IntegerField(choices=status_choices, default=DRAFT)
+    content = models.TextField(verbose_name='Content', null=True, blank=True)
     images = GenericRelation(MediaFile)
     videos = GenericRelation(MediaFile)
-    cost = PositiveIntegerField(verbose_name='Cost', default=0)
-    is_online = BooleanField(verbose_name='Is Online')
-    quantity = PositiveIntegerField(verbose_name='Quantity', validators=[MinValueValidator(1)])
+    cost = models.PositiveIntegerField(verbose_name='Cost', default=0)
+    is_online = models.BooleanField(verbose_name='Is Online')
+    quantity = models.PositiveIntegerField(verbose_name='Quantity', validators=[MinValueValidator(1)])
     # online course fields:
     sessions = GenericRelation(MediaFile)
     # offline course fields:
-    address = TextField(verbose_name='Address', null=True, blank=True)
-    deadline = DateTimeField(verbose_name='Deadline', null=True, blank=True)
+    address = models.TextField(verbose_name='Address', null=True, blank=True)
+    deadline = models.DateTimeField(verbose_name='Deadline', null=True, blank=True)
 
-    created_at = DateTimeField(auto_now_add=True)
-    updated_at = DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.title, allow_unicode=True)
