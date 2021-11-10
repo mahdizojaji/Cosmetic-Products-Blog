@@ -1,34 +1,28 @@
-from rest_framework.generics import (
-    ListCreateAPIView,
-    RetrieveUpdateDestroyAPIView,
-    CreateAPIView,
-)
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from authentication.permissions import OwnerAndAdminOrReadOnly
 from django.utils import timezone
-
-from .serializers import (
-    CommentSerializer,
-)
 from .models import Comment
+from .serializers import CommentSerializer, CommentAndRateSerializer
 
 
 class CommentListCreateAbstractView(ListCreateAPIView):
-    serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated]
     lookup_field = "uuid"
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        
         serializer.is_valid(raise_exception=True)
+        rate = None
+        if isinstance(self.get_serializer_class(), CommentAndRateSerializer):
+            rate = serializer.validated_data["rate"]
         comment = Comment(
             content_object=self.get_object(),
             author=request.user,
             text=serializer.validated_data["text"],
-            rate=serializer.validated_data["rate"],
+            rate=rate,
             created_at=timezone.now(),
         )
         comment.save()
@@ -51,6 +45,6 @@ class CommentListCreateAbstractView(ListCreateAPIView):
 
 class CommentRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
+    serializer_class = CommentAndRateSerializer
     lookup_field = "uuid"
     permission_classes = [OwnerAndAdminOrReadOnly]

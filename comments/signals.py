@@ -30,8 +30,10 @@ def apply_rate(obj: Model, value: int, unset: bool = False):
 @receiver(pre_save, sender=Comment)
 def comment_pre_save(sender, instance, **kwargs):
     obj = instance.content_object
-    if obj._meta.model_name not in RATE_MODELS:
-        # if object is not rateable we don't need to do anything.
+    print((not instance.rate))
+    if obj._meta.model_name not in RATE_MODELS or (not instance.rate):
+        # if object is not rateable or if rate is not set,
+        # we don't need to do anything.
         return
     org = Comment.objects.filter(uuid=instance.uuid)
     if org.exists():
@@ -46,8 +48,9 @@ def comment_pre_save(sender, instance, **kwargs):
 @receiver(post_delete, sender=Comment)
 def comment_post_delete(sender, instance, **kwargs):
     obj = instance.content_object
-    if obj._meta.model_name not in RATE_MODELS:
-        # if object is not rateable we don't need to do anything.
+    if obj._meta.model_name not in RATE_MODELS or (not instance.rate):
+        # if object is not rateable or if rate is not set,
+        # we don't need to do anything.
         return
     # adding rate to object and save it ->
     apply_rate(obj, instance.rate, True)

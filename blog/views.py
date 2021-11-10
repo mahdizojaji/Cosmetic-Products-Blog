@@ -15,12 +15,14 @@ from .serializers import ArticleSerializer
 from .models import Article
 
 from comments.views import CommentListCreateAbstractView
+from comments.serializers import CommentSerializer, CommentAndRateSerializer
 
 User = get_user_model()
 
 
 class ArticleCommentListCreateAPIView(CommentListCreateAbstractView):
     queryset = Article.objects.all()
+    serializer_class = CommentAndRateSerializer
 
 
 class ArticleListCreateAPIView(ListCreateAPIView):
