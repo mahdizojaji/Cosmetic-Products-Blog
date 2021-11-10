@@ -33,12 +33,12 @@ class Article(Model):
     uuid = UUIDField(verbose_name="UUID", default=uuid4, unique=True)
     author = ForeignKey(get_user_model(), on_delete=CASCADE)
     title = CharField(max_length=50, unique=True)
-    content = TextField()
+    content = TextField(blank=True, null=True)
     slug_title = SlugField(unique=True, allow_unicode=True, blank=True)
-    image = ImageField()
+    image = ImageField(blank=True, null=True)
 
-    likes = ManyToManyField(get_user_model(), related_name="article_likes")
-    bookmarks = ManyToManyField(get_user_model(), related_name="article_bookmarks")
+    likes = ManyToManyField(get_user_model(), related_name="article_likes", blank=True, null=True)
+    bookmarks = ManyToManyField(get_user_model(), related_name="article_bookmarks", blank=True, null=True)
     share_qty = BigIntegerField(default=0, blank=True)
 
     status = IntegerField(choices=status_choices, default=DRAFT)
