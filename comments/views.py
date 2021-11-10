@@ -23,17 +23,14 @@ class CommentListCreateAbstractView(ListCreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        obj = self.get_object()
         comment = Comment(
-            content_object=obj,
+            content_object=self.get_object(),
             author=request.user,
             text=serializer.validated_data["text"],
             rate=serializer.validated_data["rate"],
             created_at=timezone.now(),
         )
-        obj.set_rate(comment.rate)
         comment.save()
-        obj.save()
         serializer = self.get_serializer(comment)
         return Response(
             serializer.data,

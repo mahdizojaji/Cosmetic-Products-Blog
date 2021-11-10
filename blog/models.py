@@ -56,6 +56,8 @@ class Article(Model):
     created_at = DateTimeField(auto_now_add=True)
     updated_at = DateTimeField(auto_now=True)
 
+    # Depricated after apply_rate SIGNAL provided to comment model.
+    # Now only demonstrate how this model set_rate works.
     def set_rate(self, value):
         """Rate the article."""
         self.rate_counts += 1
