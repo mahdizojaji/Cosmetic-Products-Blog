@@ -22,7 +22,7 @@ User = get_user_model()
 
 class ArticleCommentListCreateAPIView(CommentListCreateAbstractView):
     queryset = Article.objects.all()
-    serializer_class = CommentAndRateSerializer
+    serializer_class = CommentSerializer
 
 
 class ArticleListCreateAPIView(ListCreateAPIView):

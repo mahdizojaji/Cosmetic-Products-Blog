@@ -190,10 +190,10 @@ SMS = {
 AUTH_USER_MODEL = "users.User"
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=int(os.environ["ACCESS_TOKEN_LIFETIME"])),
+    "ACCESS_TOKEN_LIFETIME": timedelta(
+        minutes=int(os.environ["ACCESS_TOKEN_LIFETIME"])
+    ),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=int(os.environ["REFRESH_TOKEN_LIFETIME"])),
 }
 
 PHONE_NUMBER_PATTERN = os.environ["PHONE_NUMBER_PATTERN"]
-
-RATE_MODELS = os.environ.get("RATE_MODELS", default="").strip('"').split()
