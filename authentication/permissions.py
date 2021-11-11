@@ -39,3 +39,23 @@ class OwnerAndAdminOrReadOnly(IsAuthenticated):
             return True
 
         return False
+
+
+class OwnerAndAdminOrAuthorOrReadOnly(IsAuthenticated):
+    def has_object_permission(self, request, view, obj):
+        if request.user.is_superuser:
+            return True
+
+        if isinstance(obj, User) and obj == request.user:
+            return True
+
+        if isinstance(obj, (Article, Comment)) and obj.author == request.user:
+            return True
+        
+        if isinstance(obj, Comment) and obj.content_object.author == request.user:
+            return True
+
+        if request.method in SAFE_METHODS:
+            return True
+
+        return False
