@@ -16,14 +16,25 @@ def apply_rate(obj: Model, value: int, unset: bool = False):
     if unset:
         obj.rate_counts -= 1
         obj.rate_points -= value
+        # author
+        obj.author.rate_counts -= 1
+        obj.author.rate_points -= value
     else:
         obj.rate_counts += 1
         obj.rate_points += value
+        # author
+        obj.author.rate_counts += 1
+        obj.author.rate_points += value
 
     if obj.rate_counts > 0:
         obj.rate = obj.rate_points / obj.rate_counts
     else:
         obj.rate = 0
+    # author
+    if obj.author.rate_counts > 0:
+        obj.author.rate = obj.author.rate_points / obj.author.rate_counts
+    else:
+        obj.author.rate = 0
 
 
 @receiver(pre_save, sender=Comment)
