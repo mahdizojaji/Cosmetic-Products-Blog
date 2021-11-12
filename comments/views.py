@@ -2,7 +2,7 @@ from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIV
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from authentication.permissions import OwnerAndAdminOrAuthorOrReadOnly
+from authentication.permissions import OwnerOrAdminOrAuthorOrReadOnly
 from django.utils import timezone
 from .models import Comment
 from .serializers import CommentSerializer, CommentAndRateSerializer
@@ -47,4 +47,4 @@ class CommentRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentAndRateSerializer
     lookup_field = "uuid"
-    permission_classes = [OwnerAndAdminOrAuthorOrReadOnly]
+    permission_classes = [OwnerOrAdminOrAuthorOrReadOnly]
