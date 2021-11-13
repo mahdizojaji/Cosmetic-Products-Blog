@@ -170,8 +170,8 @@ REST_FRAMEWORK = {
 }
 
 REST_USE_JWT = True
-JWT_AUTH_COOKIE = "my-app-auth"
-JWT_AUTH_REFRESH_COOKIE = "my-refresh-token"
+JWT_AUTH_COOKIE = "access_token"
+JWT_AUTH_REFRESH_COOKIE = "refresh_token"
 
 REST_AUTH_SERIALIZERS = {
     "USER_DETAILS_SERIALIZER": "authentication.serializers.LoginUserDetailsSerializer",
