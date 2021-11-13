@@ -8,6 +8,8 @@ from django.core.validators import MinValueValidator
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericRelation, GenericForeignKey
 
+from extensions.validators import FutureDateValidator
+
 
 def path_and_rename(instance, filename):
     ext = filename.split('.')[-1] or '.jpg'
@@ -109,7 +111,7 @@ class Course(models.Model):
     sessions = GenericRelation(MediaFile, null=True, blank=True)
     # offline course fields:
     address = models.TextField(verbose_name='Address', null=True, blank=True)
-    deadline = models.DateTimeField(verbose_name='Deadline', null=True, blank=True)
+    deadline = models.DateTimeField(verbose_name='Deadline', null=True, blank=True, validators=[FutureDateValidator()])
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
