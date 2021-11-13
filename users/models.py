@@ -16,12 +16,11 @@ from django.db.models import (
     DateTimeField,
     ImageField,
     ManyToManyField,
+    DecimalField,
+    PositiveBigIntegerField,
 )
 
 from config.settings import PHONE_NUMBER_PATTERN
-
-
-from django.contrib.auth import get_user_model
 
 
 class UserManager(BaseUserManager):
@@ -126,11 +125,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     liked_by = ManyToManyField("self", related_name="liked_users")
     bookmarked_by = ManyToManyField("self", related_name="bookmarked_users")
     share_qty = BigIntegerField(default=0, blank=True)
-
-    # this isn't approved yet ###
-    ##############################################
-    rates = BigIntegerField(default=0, blank=True)
-    ###############################################
+    rate = DecimalField(max_digits=2, decimal_places=1, default=0)
+    rate_points = PositiveBigIntegerField(default=0)
+    rate_counts = PositiveBigIntegerField(default=0)
     is_active = BooleanField(default=True)
     is_staff = BooleanField(default=False)
     is_superuser = BooleanField(default=False)
