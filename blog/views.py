@@ -1,4 +1,6 @@
+from django.forms.models import model_to_dict
 from django.contrib.auth import get_user_model
+
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
@@ -6,8 +8,9 @@ from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIV
 
 from extensions.permissions import OwnerAndAdmin, OwnerAndAdminOrReadOnly
 
-from .serializers import ArticleSerializer
 from .models import Article
+from .serializers import ArticleSerializer, OnlineCourseSerializer, OfflineCourseSerializer
+
 
 User = get_user_model()
 
@@ -167,3 +170,34 @@ class ArticleIncreaseShareAPIView(CreateAPIView):
         article.share_qty += 1
         article.save()
         return Response(status=status.HTTP_200_OK)
+
+
+class CourseCreateAPIView(CreateAPIView):
+    """Create Course"""
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.course_method = None
+
+    def get_serializer_class(self):
+        print(self.course_method)
+        if self.course_method == "online":
+            return OnlineCourseSerializer
+        return OfflineCourseSerializer
+
+    def create(self, request, *args, **kwargs):
+        self.course_method = self.request.query_params.get("method")
+        if self.course_method not in ("online", "offline"):
+            return Response(
+                data={
+                    "error": "course-method",
+                    "message": "You should set course method.",
+                    "detail": "method=online or method=offline in query_params",
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return super().create(request, *args, **kwargs)
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user, is_online=True if self.course_method == "online" else False)
