@@ -1,14 +1,8 @@
 from django.contrib.auth import get_user_model
 from rest_framework import status
-from rest_framework import response
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.generics import (
-    ListCreateAPIView,
-    RetrieveUpdateDestroyAPIView,
-    CreateAPIView,
-)
-from django.forms.models import model_to_dict
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView
 
 
 from authentication.permissions import OwnerAndAdmin, OwnerAndAdminOrReadOnly

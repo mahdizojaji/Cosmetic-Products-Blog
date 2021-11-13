@@ -1,10 +1,10 @@
-from rest_framework.fields import CharField
-from rest_framework.serializers import ModelSerializer
+from rest_framework import serializers
+
 from .models import Article
 
 
-class ArticleSerializer(ModelSerializer):
-    status = CharField(source="get_status_display", required=False)
+class ArticleSerializer(serializers.ModelSerializer):
+    status = serializers.ReadOnlyField(source="get_status_display", required=False)
 
     class Meta:
         model = Article
