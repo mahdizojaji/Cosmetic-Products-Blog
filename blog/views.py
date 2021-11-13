@@ -4,8 +4,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView
 
+from extensions.permissions import OwnerAndAdmin, OwnerAndAdminOrReadOnly
 
-from authentication.permissions import OwnerAndAdmin, OwnerAndAdminOrReadOnly
 from .serializers import ArticleSerializer
 from .models import Article
 
