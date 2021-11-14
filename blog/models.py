@@ -90,7 +90,7 @@ class Course(models.Model):
     DRAFT = 0
     PENDING = 1
     PUBLISHED = 2
-    status_choices = (
+    STATUS_CHOICES = (
         (DRAFT, "Draft"),
         (PENDING, "Pending"),
         (PUBLISHED, "Published"),
@@ -100,7 +100,7 @@ class Course(models.Model):
     author = models.ForeignKey(verbose_name='Author', to=get_user_model(), on_delete=models.SET_NULL, null=True)
     title = models.CharField(verbose_name='Title', max_length=255)
     slug = models.SlugField(verbose_name='Slug', unique=True, allow_unicode=True, blank=True)
-    status = models.IntegerField(choices=status_choices, default=DRAFT)
+    status = models.IntegerField(choices=STATUS_CHOICES, default=DRAFT)
     content = models.TextField(verbose_name='Content', null=True, blank=True)
     images = GenericRelation(MediaFile, null=True, blank=True)
     videos = GenericRelation(MediaFile, null=True, blank=True)

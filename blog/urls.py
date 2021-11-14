@@ -13,5 +13,5 @@ urlpatterns = [
     path("articles/share/<uuid:uuid>/", views.ArticleIncreaseShareAPIView.as_view(), name="articles_increase_share"),
     path("articles/publish/<uuid:uuid>/", views.ArticlePublishAPIView.as_view(), name="articles_publish"),
     # Courses
-    path("courses/", views.CourseCreateAPIView.as_view(), name="course_create"),
+    path("courses/", views.CourseListCreateAPIView.as_view(), name="course_list_create"),
 ]

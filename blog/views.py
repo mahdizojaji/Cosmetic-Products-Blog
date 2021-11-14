@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.forms.models import model_to_dict
 from django.contrib.auth import get_user_model
 
@@ -8,8 +9,9 @@ from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIV
 
 from extensions.permissions import OwnerAndAdmin, OwnerAndAdminOrReadOnly
 
-from .models import Article
-from .serializers import ArticleSerializer, OnlineCourseSerializer, OfflineCourseSerializer
+from .models import Article, Course
+from .filters import CourseFilter
+from .serializers import ArticleSerializer, OnlineCourseSerializer, OfflineCourseSerializer, CourseSerializer
 
 
 User = get_user_model()
@@ -172,19 +174,29 @@ class ArticleIncreaseShareAPIView(CreateAPIView):
         return Response(status=status.HTTP_200_OK)
 
 
-class CourseCreateAPIView(CreateAPIView):
-    """Create Course"""
+class CourseListCreateAPIView(ListCreateAPIView):
+    """List & Create Course"""
     permission_classes = [IsAuthenticatedOrReadOnly]
+    filterset_class = CourseFilter
+    search_fields = ("title", "content")
+
+    # TODO: check is seller or vip (hide sessions & addresses for non-vip)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.course_method = None
 
+    def get_queryset(self):
+        if isinstance(self.request.user, get_user_model()):
+            return Course.objects.filter(Q(author=self.request.user) | Q(status=Course.PUBLISHED))
+        return Course.objects.filter(status=Course.PUBLISHED)
+
     def get_serializer_class(self):
-        print(self.course_method)
         if self.course_method == "online":
             return OnlineCourseSerializer
-        return OfflineCourseSerializer
+        elif self.course_method == "offline":
+            return OfflineCourseSerializer
+        return CourseSerializer
 
     def create(self, request, *args, **kwargs):
         self.course_method = self.request.query_params.get("method")

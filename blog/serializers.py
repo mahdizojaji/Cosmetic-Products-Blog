@@ -69,6 +69,20 @@ class CourseAbstractSerializer(serializers.ModelSerializer):
         return serializer.data
 
 
+class CourseSerializer(CourseAbstractSerializer):
+    sessions = serializers.SerializerMethodField()
+    deadline = TimestampField(required=False, validators=[FutureDateValidator()])
+
+    def get_sessions(self, obj: Course):
+        sessions = obj.videos.filter(field_name=MediaFile.SESSIONS)
+        serializer = MediaFileSerializer(instance=sessions, many=True, context=self.context)
+        return serializer.data
+
+    class Meta:
+        model = Course
+        exclude = ("id", "created_at", "updated_at")
+
+
 class OnlineCourseSerializer(CourseAbstractSerializer):
     sessions = serializers.SerializerMethodField()
 
