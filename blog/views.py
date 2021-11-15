@@ -56,9 +56,9 @@ class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 
     def perform_update(self, serializer):
         admin = self.request.user.is_superuser
-        status = serializer.instance.status
+        _status = serializer.instance.status
 
-        if (status == Article.PENDING) and (not admin):
+        if (_status == Article.PENDING) and (not admin):
             return Response(
                 {
                     "error": "article-pending",
@@ -67,7 +67,7 @@ class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
                 },
                 status=status.HTTP_403_FORBIDDEN,
             )
-        elif status == Article.PUBLISHED:
+        elif _status == Article.PUBLISHED:
             if serializer.instance.clone:
                 return Response(
                     {
