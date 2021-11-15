@@ -38,7 +38,7 @@ class Article(Model):
 
     uuid = UUIDField(verbose_name="UUID", default=uuid4, unique=True)
     author = ForeignKey(get_user_model(), on_delete=CASCADE)
-    title = CharField(max_length=50, unique=True)
+    title = CharField(max_length=50)
     content = TextField(blank=True, null=True)
     slug = SlugField(unique=True, allow_unicode=True, blank=True)
     image = ImageField(blank=True, null=True)
