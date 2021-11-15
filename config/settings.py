@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "users.apps.UsersConfig",
     "authentication.apps.AuthenticationConfig",
     "blog.apps.BlogConfig",
+    "comments.apps.CommentsConfig",
     # Local Packages
     "extensions",
 ]
@@ -189,7 +190,9 @@ SMS = {
 AUTH_USER_MODEL = "users.User"
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=int(os.environ["ACCESS_TOKEN_LIFETIME"])),
+    "ACCESS_TOKEN_LIFETIME": timedelta(
+        minutes=int(os.environ["ACCESS_TOKEN_LIFETIME"])
+    ),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=int(os.environ["REFRESH_TOKEN_LIFETIME"])),
 }
 
