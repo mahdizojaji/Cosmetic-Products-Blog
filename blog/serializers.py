@@ -11,7 +11,7 @@ class ArticleSerializer(ModelSerializer):
         fields = (
             "uuid",
             "author",
-            "slug_title",
+            "slug",
             "created_at",
             "updated_at",
             "likes",
@@ -28,7 +28,7 @@ class ArticleSerializer(ModelSerializer):
         read_only_fields = (
             "uuid",
             "author",
-            "slug_title",
+            "slug",
             "created_at",
             "updated_at",
             "likes",

@@ -35,7 +35,7 @@ class ArticleListCreateAPIView(ListCreateAPIView):
         "author",
         "title",
         "content",
-        "slug_title",
+        "slug",
     )
 
     def filter_queryset(self, queryset):

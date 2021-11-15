@@ -18,7 +18,7 @@ from django.db.models import (
     DecimalField,
     PositiveBigIntegerField,
 )
-
+from django.utils import timezone
 from django.utils.text import slugify
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.fields import GenericRelation
@@ -40,10 +40,10 @@ class Article(Model):
     author = ForeignKey(get_user_model(), on_delete=CASCADE)
     title = CharField(max_length=50, unique=True)
     content = TextField(blank=True, null=True)
-    slug_title = SlugField(unique=True, allow_unicode=True, blank=True)
+    slug = SlugField(unique=True, allow_unicode=True, blank=True)
     image = ImageField(blank=True, null=True)
-    likes = ManyToManyField(get_user_model(), related_name="article_likes", blank=True, null=True)
-    bookmarks = ManyToManyField(get_user_model(), related_name="article_bookmarks", blank=True, null=True)
+    likes = ManyToManyField(get_user_model(), related_name="article_likes", blank=True)
+    bookmarks = ManyToManyField(get_user_model(), related_name="article_bookmarks", blank=True)
     share_qty = BigIntegerField(default=0, blank=True)
     status = IntegerField(choices=status_choices, default=DRAFT)
     original = OneToOneField(
@@ -56,18 +56,9 @@ class Article(Model):
     created_at = DateTimeField(auto_now_add=True)
     updated_at = DateTimeField(auto_now=True)
 
-    # Depricated after apply_rate SIGNAL provided to comment model.
-    # Now only demonstrate how this model set_rate works.
-    def set_rate(self, value):
-        """Rate the article."""
-        self.rate_counts += 1
-        self.rate_points += value
-        self.rate = self.rate_points / self.rate_counts
-
-    def __str__(self):
-        return self.slug_title
-
     def save(self, *args, **kwargs):
-        """Slugify the title before save."""
-        self.slug_title = slugify(self.title, allow_unicode=True)
-        super(Article, self).save(*args, **kwargs)
+        self.slug = slugify(f"{self.title} {int(timezone.now().timestamp())}", allow_unicode=True)
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"{self.slug}"
