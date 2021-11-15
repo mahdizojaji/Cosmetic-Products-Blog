@@ -9,7 +9,6 @@ from django.db.models import (
     DateTimeField,
     SlugField,
     TextField,
-    ImageField,
     CASCADE,
     DO_NOTHING,
     OneToOneField,

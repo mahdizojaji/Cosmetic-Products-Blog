@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.response import Response
@@ -28,7 +29,6 @@ class ArticleCommentListCreateAPIView(CommentListCreateAbstractView):
 class ArticleListCreateAPIView(ListCreateAPIView):
     """Create &  List Articles"""
 
-    queryset = Article.objects.all()
     serializer_class = ArticleSerializer
     permission_classes = [IsAuthenticated]
     filterset_fields = (
@@ -38,9 +38,12 @@ class ArticleListCreateAPIView(ListCreateAPIView):
         "slug",
     )
 
-    def filter_queryset(self, queryset):
-        queryset = super().filter_queryset(queryset)
-        return queryset.order_by("-created_at")
+    def get_queryset(self):
+        if isinstance(self.request.user, get_user_model()):
+            return Article.objects.filter(
+                Q(author=self.request.user) | Q(status=Article.PUBLISHED)
+            ).order_by("-created_at")
+        return Article.objects.filter(status=Article.PUBLISHED).order_by("-created_at")
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
