@@ -96,7 +96,7 @@ iran_provinces = (
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    uuid = UUIDField(verbose_name="UUID", default=uuid.uuid4)
+    uuid = UUIDField(verbose_name="UUID", default=uuid.uuid4, unique=True)
     phone_number_validator = RegexValidator(
         regex=PHONE_NUMBER_PATTERN, message="Phone number must be entered."
     )
@@ -114,16 +114,24 @@ class User(AbstractBaseUser, PermissionsMixin):
     fname = CharField(max_length=30, null=True, blank=True)
     lname = CharField(max_length=30, null=True, blank=True)
     avatar_img = ImageField(
-        upload_to="images/users/avatars/", height_field=None, width_field=None
+        upload_to="images/users/avatars/",
+        height_field=None,
+        width_field=None,
+        null=True,
+        blank=True,
     )
     cover_img = ImageField(
-        upload_to="images/users/covers/", height_field=None, width_field=None
+        upload_to="images/users/covers/",
+        height_field=None,
+        width_field=None,
+        null=True,
+        blank=True,
     )
-    province = CharField(max_length=30, choices=iran_provinces, null=True)
-    city = CharField(max_length=30, null=True)
+    province = CharField(max_length=30, choices=iran_provinces, blank=True, null=True)
+    city = CharField(max_length=30, blank=True, null=True)
     vip_expire = BigIntegerField(default=0, blank=True)
-    liked_by = ManyToManyField("self", related_name="liked_users")
-    bookmarked_by = ManyToManyField("self", related_name="bookmarked_users")
+    liked_by = ManyToManyField("self", related_name="liked_users", blank=True)
+    bookmarked_by = ManyToManyField("self", related_name="bookmarked_users", blank=True)
     share_qty = BigIntegerField(default=0, blank=True)
     rate = DecimalField(max_digits=2, decimal_places=1, default=0)
     rate_points = PositiveBigIntegerField(default=0)
