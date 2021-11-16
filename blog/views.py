@@ -1,23 +1,24 @@
 from django.db.models import Q
+from django.forms.models import model_to_dict
 from django.contrib.auth import get_user_model
+
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.generics import (
-    ListCreateAPIView,
-    RetrieveUpdateDestroyAPIView,
-    CreateAPIView,
+    ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView, RetrieveAPIView, GenericAPIView
 )
-from django.forms.models import model_to_dict
 
-
-from authentication.permissions import OwnerAndAdmin, OwnerAndAdminOrReadOnly
-from .serializers import ArticleSerializer, ArticleWriteSerializer
-from .models import Article
-
+from extensions.permissions import OwnerAndAdmin, OwnerAndAdminOrReadOnly, IsAdmin
 from comments.views import CommentListCreateAbstractView
 from comments.serializers import CommentSerializer, CommentAndRateSerializer
+
+from .models import Article, Course
+from .filters import CourseFilter
+from .serializers import (
+    ArticleSerializer, ArticleWriteSerializer, OnlineCourseSerializer, OfflineCourseSerializer, CourseSerializer
+)
 
 User = get_user_model()
 
@@ -136,6 +137,7 @@ class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
         return Response(serializer.data)
 
 
+# TODO: Use GenericAPIView instead CreateAPIView for some views
 class ArticlePublishAPIView(CreateAPIView):
     """Change Article Status to PUBLISHED"""
 
@@ -234,3 +236,85 @@ class ArticleIncreaseShareAPIView(CreateAPIView):
         article.share_qty += 1
         article.save()
         return Response(status=status.HTTP_200_OK)
+
+
+class CourseListCreateAPIView(ListCreateAPIView):
+    """List & Create Course"""
+    # TODO: Convert some Authenticated permissions to FullProfile Permission
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    filterset_class = CourseFilter
+    search_fields = ("title", "content")
+    parser_classes = (MultiPartParser, FormParser,)
+
+    # TODO: check is seller or vip (hide sessions & addresses for non-vip)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.course_method = None
+        self.data = None
+
+    def get_serializer(self, *args, **kwargs):
+        self.data = kwargs.get('data')
+        return super().get_serializer(*args, **kwargs)
+
+    def get_serializer_class(self):
+        if self.course_method == "online" and self.data:
+            return OnlineCourseSerializer
+        elif self.course_method == "offline" and self.data:
+            return OfflineCourseSerializer
+        return CourseSerializer
+
+    def get_queryset(self):
+        if isinstance(self.request.user, get_user_model()):
+            return Course.objects.filter(Q(author=self.request.user) | Q(status=Course.PUBLISHED))
+        return Course.objects.filter(status=Course.PUBLISHED)
+
+    def create(self, request, *args, **kwargs):
+        self.course_method = self.request.query_params.get("method")
+        if self.course_method not in ("online", "offline"):
+            return Response(
+                data={
+                    "error": "course-method",
+                    "message": "You should set course method.",
+                    "detail": "method=online or method=offline in query_params",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        self.perform_create(serializer)
+
+        serializer = self.get_serializer(instance=serializer.instance)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer):
+        serializer.save(
+            author=self.request.user,
+            is_online=True if self.course_method == "online" else False
+        )
+
+
+class CourseRetrieveAPIView(RetrieveAPIView):
+    """Course Details"""
+    queryset = Course.objects.all()
+    lookup_field = "uuid"
+    serializer_class = CourseSerializer
+
+
+class CoursePublishAPIView(GenericAPIView):
+    """Change course Status to PUBLISHED"""
+
+    queryset = Course.objects.all()
+    serializer_class = CourseSerializer
+    permission_classes = [IsAdmin]
+    lookup_field = "uuid"
+
+    def get(self, request, *args, **kwargs):
+        obj = self.get_object()
+        obj.status = Article.PUBLISHED
+        obj.save()
+        serializer = self.get_serializer(instance=obj)
+        return Response(serializer.data, status=status.HTTP_200_OK)

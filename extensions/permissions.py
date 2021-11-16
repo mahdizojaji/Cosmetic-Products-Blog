@@ -7,8 +7,13 @@ from comments.models import Comment
 User = get_user_model()
 
 
+class IsAdmin(IsAuthenticated):
+    def has_permission(self, request, view):
+        return request.user.is_superuser
+
+
 class OwnerAndAdmin(IsAuthenticated):
-    """This premissions is only True for
+    """This permissions is only True for
     Authenticated Admin or Owner itself"""
 
     def has_object_permission(self, request, view, obj):

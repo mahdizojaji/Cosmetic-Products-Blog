@@ -1,11 +1,12 @@
-from django.db.models import Model
 from django.dispatch import receiver
 from django.db.models.signals import pre_save, post_delete
+
+from blog.models import Course, Article
 
 from .models import Comment
 
 
-def apply_rate(obj: Model, value: int, unset: bool = False):
+def apply_rate(obj: Article or Course, value: int, unset: bool = False):
     """Calculate rate for object based on UNSET argument
 
     Args:

@@ -5,7 +5,7 @@ from rest_framework.serializers import (
 )
 from django.contrib.auth import get_user_model
 
-from authentication.permissions import OwnerAndAdmin
+from extensions.permissions import OwnerAndAdmin
 
 User = get_user_model()
 

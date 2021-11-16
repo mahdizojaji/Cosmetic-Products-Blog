@@ -129,6 +129,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     province = CharField(max_length=30, choices=iran_provinces, blank=True, null=True)
     city = CharField(max_length=30, blank=True, null=True)
+    # TODO: fix: Convert province to integer field
+    province = CharField(max_length=30, choices=iran_provinces, null=True)
+    city = CharField(max_length=30, null=True)
     vip_expire = BigIntegerField(default=0, blank=True)
     liked_by = ManyToManyField("self", related_name="liked_users", blank=True)
     bookmarked_by = ManyToManyField("self", related_name="bookmarked_users", blank=True)

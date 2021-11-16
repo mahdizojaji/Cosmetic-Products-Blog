@@ -1,9 +1,12 @@
+from django.utils import timezone
+
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from authentication.permissions import OwnerOrAdminOrAuthorOrReadOnly
-from django.utils import timezone
+
+from extensions.permissions import OwnerOrAdminOrAuthorOrReadOnly
+
 from .models import Comment
 from .serializers import CommentSerializer, CommentAndRateSerializer
 

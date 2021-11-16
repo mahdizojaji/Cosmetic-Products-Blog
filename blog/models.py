@@ -1,33 +1,20 @@
 from uuid import uuid4
+
 from django.db import models
-from django.db.models import (
-    Model,
-    ManyToManyField,
-    BigIntegerField,
-    IntegerField,
-    CharField,
-    DateTimeField,
-    SlugField,
-    TextField,
-    CASCADE,
-    DO_NOTHING,
-    OneToOneField,
-    UUIDField,
-    ForeignKey,
-    DecimalField,
-    PositiveBigIntegerField,
-)
 from django.utils import timezone
 from django.utils.text import slugify
 from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericRelation, GenericForeignKey
+
+from extensions.validators import FutureDateValidator
 
 from comments.models import Comment
 
 
 def path_and_rename(instance, filename):
-    ext = filename.split(".")[-1] or ".jpg"
+    ext = filename.split('.')[-1] or ".jpg"
     # get filename
     if instance.id:
         file_name = f"{int(timezone.now().timestamp())}-{instance.id}.{ext}"
@@ -67,43 +54,78 @@ class MediaFile(models.Model):
         return f"{self.uuid}"
 
 
-class Article(Model):
+class Article(models.Model):
     DRAFT = 0
     PENDING = 1
     PUBLISHED = 2
-    status_choices = (
+    STATUS_CHOICES = (
         (DRAFT, "Draft"),
+        # TODO: Not all fields need to be complete in draft state & it should check in make publish API.
         (PENDING, "Pending"),
         (PUBLISHED, "Published"),
     )
 
-    uuid = UUIDField(verbose_name="UUID", default=uuid4, unique=True)
-    author = ForeignKey(get_user_model(), on_delete=CASCADE)
-    title = CharField(max_length=50)
-    content = TextField(blank=True, null=True)
-    slug = SlugField(unique=True, allow_unicode=True, blank=True)
+    uuid = models.UUIDField(verbose_name="UUID", default=uuid4, unique=True)
+    author = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL)
+    title = models.CharField(max_length=50)
+    content = models.TextField(blank=True, null=True)
+    slug = models.SlugField(unique=True, allow_unicode=True, blank=True)
     images = GenericRelation(MediaFile, null=True, blank=True)
     videos = GenericRelation(MediaFile, null=True, blank=True)
-    likes = ManyToManyField(get_user_model(), related_name="article_likes", blank=True)
-    bookmarks = ManyToManyField(
-        get_user_model(), related_name="article_bookmarks", blank=True
-    )
-    share_qty = BigIntegerField(default=0, blank=True)
-    status = IntegerField(choices=status_choices, default=DRAFT)
-    original = OneToOneField(
-        "self", on_delete=DO_NOTHING, null=True, blank=True, related_name="clone"
-    )
+    likes = models.ManyToManyField(get_user_model(), related_name="article_likes", blank=True)
+    bookmarks = models.ManyToManyField(get_user_model(), related_name="article_bookmarks", blank=True)
+    share_qty = models.BigIntegerField(default=0, blank=True)
+    status = models.IntegerField(choices=STATUS_CHOICES, default=DRAFT)
+    original = models.OneToOneField("self", on_delete=models.DO_NOTHING, null=True, blank=True, related_name="clone")
+    slug_title = models.SlugField(unique=True, allow_unicode=True, blank=True)
+    image = models.ImageField()
     comments = GenericRelation(Comment, null=True, blank=True)
-    rate = DecimalField(max_digits=2, decimal_places=1, default=0)
-    rate_points = PositiveBigIntegerField(default=0)
-    rate_counts = PositiveBigIntegerField(default=0)
-    created_at = DateTimeField(auto_now_add=True)
-    updated_at = DateTimeField(auto_now=True)
+    rate = models.DecimalField(max_digits=2, decimal_places=1, default=0)
+    rate_points = models.PositiveBigIntegerField(default=0)
+    rate_counts = models.PositiveBigIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(
-            f"{self.title} {int(timezone.now().timestamp())}", allow_unicode=True
-        )
+        self.slug = slugify(f"{self.title} {int(timezone.now().timestamp())}", allow_unicode=True)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.slug}"
+
+
+class Course(models.Model):
+    DRAFT = 0
+    PENDING = 1
+    PUBLISHED = 2
+    STATUS_CHOICES = (
+        (DRAFT, "Draft"),
+        (PENDING, "Pending"),
+        (PUBLISHED, "Published"),
+    )
+    # same fields for online & offline courses:
+    uuid = models.UUIDField(verbose_name="UUID", unique=True, default=uuid4)
+    author = models.ForeignKey(verbose_name='Author', to=get_user_model(), on_delete=models.SET_NULL, null=True)
+    title = models.CharField(verbose_name='Title', max_length=255)
+    slug = models.SlugField(verbose_name='Slug', unique=True, allow_unicode=True, blank=True)
+    status = models.IntegerField(choices=STATUS_CHOICES, default=DRAFT)
+    content = models.TextField(verbose_name='Content', null=True, blank=True)
+    images = GenericRelation(MediaFile, null=True, blank=True)
+    videos = GenericRelation(MediaFile, null=True, blank=True)
+    cost = models.PositiveIntegerField(verbose_name='Cost', default=0)
+    is_online = models.BooleanField(verbose_name='Is Online')
+    quantity = models.PositiveIntegerField(verbose_name='Quantity', validators=[MinValueValidator(1)])
+    # online course fields:
+    sessions = GenericRelation(MediaFile, null=True, blank=True)
+    # offline course fields:
+    address = models.TextField(verbose_name='Address', null=True, blank=True)
+    deadline = models.DateTimeField(verbose_name='Deadline', null=True, blank=True, validators=[FutureDateValidator()])
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(f"{self.title} {int(timezone.now().timestamp())}", allow_unicode=True)
         super().save(*args, **kwargs)
 
     def __str__(self):
