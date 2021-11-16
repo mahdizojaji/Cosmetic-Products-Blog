@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView, RetrieveAPIView
 
 from extensions.permissions import OwnerAndAdmin, OwnerAndAdminOrReadOnly
 
@@ -231,3 +231,10 @@ class CourseListCreateAPIView(ListCreateAPIView):
             author=self.request.user,
             is_online=True if self.course_method == "online" else False
         )
+
+
+class CourseRetrieveAPIView(RetrieveAPIView):
+    """Course Details"""
+    queryset = Course.objects.all()
+    lookup_field = "uuid"
+    serializer_class = CourseSerializer

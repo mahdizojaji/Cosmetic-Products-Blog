@@ -6,6 +6,7 @@ app_name = "blog"
 
 urlpatterns = [
     # Articles
+    # TODO: Fix all urls
     path("articles/", views.ArticleListCreateAPIView.as_view(), name="articles_list_create"),
     path("articles/<uuid:uuid>/", views.ArticleRetrieveUpdateDestroyAPIView.as_view(), name="articles_retrieve_update_destroy"),
     path("articles/like/<uuid:uuid>/", views.ArticleLikeAPIView.as_view(), name="articles_like"),
@@ -14,4 +15,5 @@ urlpatterns = [
     path("articles/publish/<uuid:uuid>/", views.ArticlePublishAPIView.as_view(), name="articles_publish"),
     # Courses
     path("courses/", views.CourseListCreateAPIView.as_view(), name="course_list_create"),
+    path("courses/<uuid:uuid>/", views.CourseRetrieveAPIView.as_view(), name="course_retrieve"),
 ]
