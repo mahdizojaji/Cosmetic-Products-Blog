@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from extensions.serializer_fields import TimestampField
 from extensions.validators import FutureDateValidator
@@ -68,6 +69,20 @@ class CourseAbstractSerializer(serializers.ModelSerializer):
         serializer = MediaFileSerializer(instance=videos, many=True, context=self.context)
         return serializer.data
 
+    def create(self, validated_data):
+        images = validated_data.pop('images', [])
+        videos = validated_data.pop('videos', [])
+        instance: Course = super().create(validated_data)
+        for c, image in enumerate(images):
+            MediaFile.objects.create(
+                content_object=instance, file=image, field_name=MediaFile.IMAGES, author=instance.author,
+            )
+        for video in videos:
+            MediaFile.objects.create(
+                content_object=instance, file=video, field_name=MediaFile.VIDEOS, author=instance.author,
+            )
+        return instance
+
 
 class CourseSerializer(CourseAbstractSerializer):
     sessions = serializers.SerializerMethodField()
@@ -84,23 +99,66 @@ class CourseSerializer(CourseAbstractSerializer):
 
 
 class OnlineCourseSerializer(CourseAbstractSerializer):
-    sessions = serializers.SerializerMethodField()
+    images = serializers.ListField(
+        required=True,
+        child=serializers.ImageField(required=False)
+    )
+    videos = serializers.ListField(
+        required=True,
+        child=serializers.FileField(required=False, allow_empty_file=False, use_url=False),
+    )
+    sessions = serializers.ListField(
+        required=False,
+        child=serializers.FileField(required=False, allow_empty_file=False, use_url=False),
+    )
 
-    def get_sessions(self, obj: Course):
-        sessions = obj.videos.filter(field_name=MediaFile.SESSIONS)
-        serializer = MediaFileSerializer(instance=sessions, many=True, context=self.context)
-        return serializer.data
+    def validate(self, attrs):
+        super().validate(attrs)
+        if attrs["quantity"] != len(attrs['sessions']):
+            raise ValidationError(
+                detail={
+                    "sessions": f"quantity({attrs['quantity']}) not equal quantity of sessions"
+                                f"({len(attrs['sessions'])})",
+                },
+            )
+        return attrs
+
+    def create(self, validated_data):
+        sessions = validated_data.pop('sessions', [])
+        instance: Course = super().create(validated_data)
+        for session in sessions:
+            MediaFile.objects.create(
+                content_object=instance, file=session, field_name=MediaFile.SESSIONS, author=instance.author,
+            )
+        return instance
 
     class Meta:
         model = Course
         exclude = ("id", "address", "deadline", "created_at", "updated_at")
         read_only_fields = ("uuid", "author", "slug", "status", "is_online")
+        extra_kwargs = {
+            "content": {"required": True},
+            "cost": {"required": True},
+        }
 
 
 class OfflineCourseSerializer(CourseAbstractSerializer):
-    deadline = TimestampField(required=False, validators=[FutureDateValidator()])
+    deadline = TimestampField(required=True, validators=[FutureDateValidator()])
+    images = serializers.ListField(
+        required=False,
+        child=serializers.ImageField(required=False)
+    )
+    videos = serializers.ListField(
+        required=False,
+        child=serializers.FileField(required=False, allow_empty_file=False, use_url=False),
+    )
 
     class Meta:
         model = Course
         exclude = ("id", "created_at", "updated_at")
         read_only_fields = ("uuid", "author", "slug", "status", "is_online")
+        extra_kwargs = {
+            "content": {"required": True},
+            "cost": {"required": True},
+            "address": {"required": True},
+        }

@@ -3,6 +3,7 @@ from django.forms.models import model_to_dict
 from django.contrib.auth import get_user_model
 
 from rest_framework import status
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView
@@ -179,24 +180,30 @@ class CourseListCreateAPIView(ListCreateAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
     filterset_class = CourseFilter
     search_fields = ("title", "content")
+    parser_classes = (MultiPartParser, FormParser,)
 
     # TODO: check is seller or vip (hide sessions & addresses for non-vip)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.course_method = None
+        self.data = None
+
+    def get_serializer(self, *args, **kwargs):
+        self.data = kwargs.get('data')
+        return super().get_serializer(*args, **kwargs)
+
+    def get_serializer_class(self):
+        if self.course_method == "online" and self.data:
+            return OnlineCourseSerializer
+        elif self.course_method == "offline" and self.data:
+            return OfflineCourseSerializer
+        return CourseSerializer
 
     def get_queryset(self):
         if isinstance(self.request.user, get_user_model()):
             return Course.objects.filter(Q(author=self.request.user) | Q(status=Course.PUBLISHED))
         return Course.objects.filter(status=Course.PUBLISHED)
-
-    def get_serializer_class(self):
-        if self.course_method == "online":
-            return OnlineCourseSerializer
-        elif self.course_method == "offline":
-            return OfflineCourseSerializer
-        return CourseSerializer
 
     def create(self, request, *args, **kwargs):
         self.course_method = self.request.query_params.get("method")
@@ -207,9 +214,20 @@ class CourseListCreateAPIView(ListCreateAPIView):
                     "message": "You should set course method.",
                     "detail": "method=online or method=offline in query_params",
                 },
-                status=status.HTTP_403_FORBIDDEN,
+                status=status.HTTP_400_BAD_REQUEST,
             )
-        return super().create(request, *args, **kwargs)
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        self.perform_create(serializer)
+
+        serializer = self.get_serializer(instance=serializer.instance)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user, is_online=True if self.course_method == "online" else False)
+        serializer.save(
+            author=self.request.user,
+            is_online=True if self.course_method == "online" else False
+        )
