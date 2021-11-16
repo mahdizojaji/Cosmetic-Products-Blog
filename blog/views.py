@@ -1,8 +1,9 @@
 from django.db.models import Q
 from django.contrib.auth import get_user_model
 from rest_framework import status
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.generics import (
     ListCreateAPIView,
     RetrieveUpdateDestroyAPIView,
@@ -12,7 +13,7 @@ from django.forms.models import model_to_dict
 
 
 from authentication.permissions import OwnerAndAdmin, OwnerAndAdminOrReadOnly
-from .serializers import ArticleSerializer
+from .serializers import ArticleSerializer, ArticleWriteSerializer
 from .models import Article
 
 from comments.views import CommentListCreateAbstractView
@@ -28,15 +29,27 @@ class ArticleCommentListCreateAPIView(CommentListCreateAbstractView):
 
 class ArticleListCreateAPIView(ListCreateAPIView):
     """Create &  List Articles"""
-
-    serializer_class = ArticleSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    parser_classes = (MultiPartParser, FormParser,)
     filterset_fields = (
         "author",
         "title",
         "content",
         "slug",
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.data = None
+
+    def get_serializer(self, *args, **kwargs):
+        self.data = kwargs.get('data')
+        return super().get_serializer(*args, **kwargs)
+
+    def get_serializer_class(self):
+        if self.data:
+            return ArticleWriteSerializer
+        return ArticleSerializer
 
     def get_queryset(self):
         if isinstance(self.request.user, get_user_model()):
@@ -45,19 +58,47 @@ class ArticleListCreateAPIView(ListCreateAPIView):
             ).order_by("-created_at")
         return Article.objects.filter(status=Article.PUBLISHED).order_by("-created_at")
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        serializer = self.get_serializer(instance=serializer.instance)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
 
 class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     """Retrieve, Update & Delete Articles"""
-
-    queryset = Article.objects.all()
-    serializer_class = ArticleSerializer
-    permission_classes = [OwnerAndAdminOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    parser_classes = (MultiPartParser, FormParser,)
     lookup_field = "uuid"
 
-    def perform_update(self, serializer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.data = None
+
+    def get_serializer(self, *args, **kwargs):
+        self.data = kwargs.get('data')
+        return super().get_serializer(*args, **kwargs)
+
+    def get_serializer_class(self):
+        if self.data:
+            return ArticleWriteSerializer
+        return ArticleSerializer
+
+    def get_queryset(self):
+        if isinstance(self.request.user, get_user_model()):
+            return Article.objects.filter(Q(author=self.request.user) | Q(status=Article.PUBLISHED))
+        return Article.objects.filter(status=Article.PUBLISHED)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
         admin = self.request.user.is_superuser
         _status = serializer.instance.status
 
@@ -83,12 +124,22 @@ class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
             data = serializer.validated_data
             data["status"] = Article.PENDING
             Article.objects.create(**data)
-        else:
-            serializer.save()
+
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
 
 class ArticlePublishAPIView(CreateAPIView):
     """Change Article Status to PUBLISHED"""
+
+    # TODO: Check all required fields are filled
 
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer

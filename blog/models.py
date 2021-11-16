@@ -55,13 +55,11 @@ class MediaFile(models.Model):
     content_type = models.ForeignKey(
         ContentType,
         on_delete=models.CASCADE,
-        limit_choices_to={"model__in": ["course"]},
+        limit_choices_to={"model__in": ["course", "article"]},
     )
     content_object = GenericForeignKey("content_type", "object_id")
     file = models.FileField(verbose_name="File", upload_to=path_and_rename)
-    field_name = models.IntegerField(
-        verbose_name="Field Name", choices=FIELD_NAME_CHOICES
-    )
+    field_name = models.IntegerField(verbose_name="Field Name", choices=FIELD_NAME_CHOICES)
     created_at = models.DateTimeField(verbose_name="Created At", auto_now_add=True)
     updated_at = models.DateTimeField(verbose_name="Updated At", auto_now=True)
 
@@ -85,6 +83,7 @@ class Article(Model):
     content = TextField(blank=True, null=True)
     slug = SlugField(unique=True, allow_unicode=True, blank=True)
     images = GenericRelation(MediaFile, null=True, blank=True)
+    videos = GenericRelation(MediaFile, null=True, blank=True)
     likes = ManyToManyField(get_user_model(), related_name="article_likes", blank=True)
     bookmarks = ManyToManyField(
         get_user_model(), related_name="article_bookmarks", blank=True
