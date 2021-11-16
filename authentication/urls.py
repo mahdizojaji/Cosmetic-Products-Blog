@@ -1,6 +1,7 @@
+from django.urls import path
 from rest_framework_simplejwt.views import TokenVerifyView
 from dj_rest_auth.jwt_auth import get_refresh_view
-from django.urls import path
+
 from .views import SendCodeAPIView, LoginAPIView
 
 

@@ -10,7 +10,7 @@ from .views import (
 app_name = "users"
 
 urlpatterns = [
-    # TODO: Add update users feature
+    # TODO: Add update users routes
     path("details/", UserDetailsRetrieveUpdateAPIView.as_view(), name="user_details_retrieve_update"),
     path("<uuid:uuid>/", UserRetrieveAPIView.as_view(), name="user_retrieve"),
     path("<uuid:uuid>/like/", UserLikeAPIView.as_view(), name="user_like"),

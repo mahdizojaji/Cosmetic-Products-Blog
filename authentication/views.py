@@ -1,15 +1,18 @@
-from django.contrib.auth import get_user_model, authenticate
 from django.utils import timezone
-from rest_framework import status, serializers
+from django.contrib.auth import get_user_model, authenticate
+
 from rest_framework.request import Request
-from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
+from rest_framework import status, serializers
+from rest_framework.generics import CreateAPIView
+
 from dj_rest_auth.views import LoginView
 from dj_rest_auth.utils import jwt_encode
 
-from .serializers import SendCodeSerializer, LoginSerializer
-from extensions.sms import generate_random_code, send_otp_sms
 from config import settings
+from extensions.sms import generate_random_code, send_otp_sms
+
+from .serializers import SendCodeSerializer, LoginSerializer
 
 User = get_user_model()
 

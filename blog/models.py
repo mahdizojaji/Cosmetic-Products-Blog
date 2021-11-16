@@ -9,7 +9,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericRelation, GenericForeignKey
 
 from extensions.validators import FutureDateValidator
-
 from comments.models import Comment
 
 
@@ -35,16 +34,14 @@ class MediaFile(models.Model):
         (SESSIONS, "Sessions"),
     )
     uuid = models.UUIDField(verbose_name="UUID", unique=True, default=uuid4)
-    author = models.ForeignKey(
-        to=get_user_model(), on_delete=models.DO_NOTHING, related_name="media_files"
-    )
+    author = models.ForeignKey(to=get_user_model(), on_delete=models.DO_NOTHING, related_name="media_files")
     object_id = models.PositiveIntegerField()
     content_type = models.ForeignKey(
-        ContentType,
+        to=ContentType,
         on_delete=models.CASCADE,
         limit_choices_to={"model__in": ["course", "article"]},
     )
-    content_object = GenericForeignKey("content_type", "object_id")
+    content_object = GenericForeignKey(ct_field="content_type", fk_field="object_id")
     file = models.FileField(verbose_name="File", upload_to=path_and_rename)
     field_name = models.IntegerField(verbose_name="Field Name", choices=FIELD_NAME_CHOICES)
     created_at = models.DateTimeField(verbose_name="Created At", auto_now_add=True)
@@ -66,7 +63,7 @@ class Article(models.Model):
     )
 
     uuid = models.UUIDField(verbose_name="UUID", default=uuid4, unique=True)
-    author = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL)
+    author = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True)
     title = models.CharField(max_length=50)
     content = models.TextField(blank=True, null=True)
     slug = models.SlugField(unique=True, allow_unicode=True, blank=True)
@@ -77,8 +74,6 @@ class Article(models.Model):
     share_qty = models.BigIntegerField(default=0, blank=True)
     status = models.IntegerField(choices=STATUS_CHOICES, default=DRAFT)
     original = models.OneToOneField("self", on_delete=models.DO_NOTHING, null=True, blank=True, related_name="clone")
-    slug_title = models.SlugField(unique=True, allow_unicode=True, blank=True)
-    image = models.ImageField()
     comments = GenericRelation(Comment, null=True, blank=True)
     rate = models.DecimalField(max_digits=2, decimal_places=1, default=0)
     rate_points = models.PositiveBigIntegerField(default=0)

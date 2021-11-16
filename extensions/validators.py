@@ -8,8 +8,8 @@ from datetime import datetime
 
 @deconstructible
 class FutureDateValidator:
-    message = _('Enter a Future Date value.')
-    code = 'invalid-date'
+    message = _("Enter a Future Date value.")
+    code = "invalid-date"
 
     def __init__(self, message=None, code=None):
         if message is not None:
@@ -34,7 +34,7 @@ class FutureDateValidator:
             invalid_input = True
 
         if invalid_input:
-            raise ValidationError(self.message, code=self.code, params={'value': value})
+            raise ValidationError(self.message, code=self.code, params={"value": value})
 
     def __eq__(self, other):
         return (

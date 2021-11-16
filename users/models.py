@@ -114,14 +114,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     fname = CharField(max_length=30, null=True, blank=True)
     lname = CharField(max_length=30, null=True, blank=True)
     avatar_img = ImageField(
-        upload_to="images/users/avatars/",
+        upload_to="users/avatars/",
         height_field=None,
         width_field=None,
         null=True,
         blank=True,
     )
     cover_img = ImageField(
-        upload_to="images/users/covers/",
+        upload_to="users/covers/",
         height_field=None,
         width_field=None,
         null=True,
@@ -130,8 +130,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     province = CharField(max_length=30, choices=iran_provinces, blank=True, null=True)
     city = CharField(max_length=30, blank=True, null=True)
     # TODO: fix: Convert province to integer field
-    province = CharField(max_length=30, choices=iran_provinces, null=True)
-    city = CharField(max_length=30, null=True)
     vip_expire = BigIntegerField(default=0, blank=True)
     liked_by = ManyToManyField("self", related_name="liked_users", blank=True)
     bookmarked_by = ManyToManyField("self", related_name="bookmarked_users", blank=True)

@@ -8,11 +8,11 @@ from .models import Article, Course, MediaFile
 
 
 class MediaFileSerializer(serializers.ModelSerializer):
-    author = serializers.ReadOnlyField(source='author.uuid')
+    author = serializers.ReadOnlyField(source="author.uuid")
     url = serializers.SerializerMethodField()
 
     def get_url(self, obj):
-        request = self.context['request']
+        request = self.context["request"]
         return request.build_absolute_uri(obj.file.url)
 
     class Meta:
@@ -21,8 +21,8 @@ class MediaFileSerializer(serializers.ModelSerializer):
 
 
 class ArticleAbstractSerializer(serializers.ModelSerializer):
-    author = serializers.ReadOnlyField(source='author.uuid')
-    status = serializers.ReadOnlyField(source='get_status_display')
+    author = serializers.ReadOnlyField(source="author.uuid")
+    status = serializers.ReadOnlyField(source="get_status_display")
     images = serializers.SerializerMethodField()
     videos = serializers.SerializerMethodField()
 
@@ -37,8 +37,8 @@ class ArticleAbstractSerializer(serializers.ModelSerializer):
         return serializer.data
 
     def create(self, validated_data):
-        images = validated_data.pop('images', [])
-        videos = validated_data.pop('videos', [])
+        images = validated_data.pop("images", [])
+        videos = validated_data.pop("videos", [])
         instance: Article = super().create(validated_data)
         for image in images:
             MediaFile.objects.create(
@@ -51,8 +51,8 @@ class ArticleAbstractSerializer(serializers.ModelSerializer):
         return instance
 
     def update(self, instance, validated_data):
-        images = validated_data.pop('images', [])
-        videos = validated_data.pop('videos', [])
+        images = validated_data.pop("images", [])
+        videos = validated_data.pop("videos", [])
         instance: Article = super().update(instance, validated_data)
         instance.images.clear()
         instance.videos.clear()
@@ -72,37 +72,12 @@ class ArticleSerializer(ArticleAbstractSerializer):
     class Meta:
         model = Article
         fields = (
-            "uuid",
-            "author",
-            "slug",
-            "created_at",
-            "updated_at",
-            "likes",
-            "bookmarks",
-            "share_qty",
-            "status",
-            "rate",
-            "rate_counts",
-            # ---
-            "title",
-            "content",
-            "images",
-            "videos",
+            "uuid", "author", "slug", "created_at", "updated_at", "likes", "bookmarks", "share_qty", "status", "rate",
+            "rate_counts", "title", "content", "images", "videos",
         )
         read_only_fields = (
-            "uuid",
-            "author",
-            "slug",
-            "created_at",
-            "updated_at",
-            "likes",
-            "bookmarks",
-            "share_qty",
-            "status",
-            "rate",
-            "rate_counts",
-            "images",
-            "videos",
+            "uuid", "author", "slug", "created_at", "updated_at", "likes", "bookmarks", "share_qty", "status", "rate",
+            "rate_counts", "images", "videos",
         )
 
 
@@ -123,8 +98,8 @@ class ArticleWriteSerializer(ArticleAbstractSerializer):
 
 
 class CourseAbstractSerializer(serializers.ModelSerializer):
-    author = serializers.ReadOnlyField(source='author.uuid')
-    status = serializers.ReadOnlyField(source='get_status_display')
+    author = serializers.ReadOnlyField(source="author.uuid")
+    status = serializers.ReadOnlyField(source="get_status_display")
     images = serializers.SerializerMethodField()
     videos = serializers.SerializerMethodField()
 
@@ -139,10 +114,10 @@ class CourseAbstractSerializer(serializers.ModelSerializer):
         return serializer.data
 
     def create(self, validated_data):
-        images = validated_data.pop('images', [])
-        videos = validated_data.pop('videos', [])
+        images = validated_data.pop("images", [])
+        videos = validated_data.pop("videos", [])
         instance: Course = super().create(validated_data)
-        for c, image in enumerate(images):
+        for image in images:
             MediaFile.objects.create(
                 content_object=instance, file=image, field_name=MediaFile.IMAGES, author=instance.author,
             )
@@ -183,7 +158,7 @@ class OnlineCourseSerializer(CourseAbstractSerializer):
 
     def validate(self, attrs):
         super().validate(attrs)
-        if attrs["quantity"] != len(attrs['sessions']):
+        if attrs["quantity"] != len(attrs["sessions"]):
             raise ValidationError(
                 detail={
                     "sessions": f"quantity({attrs['quantity']}) not equal quantity of sessions"
@@ -193,7 +168,7 @@ class OnlineCourseSerializer(CourseAbstractSerializer):
         return attrs
 
     def create(self, validated_data):
-        sessions = validated_data.pop('sessions', [])
+        sessions = validated_data.pop("sessions", [])
         instance: Course = super().create(validated_data)
         for session in sessions:
             MediaFile.objects.create(

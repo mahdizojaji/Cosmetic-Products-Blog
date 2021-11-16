@@ -1,9 +1,8 @@
-from rest_framework import serializers
-
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from datetime import datetime
+from rest_framework import serializers
 
 
 class TimestampField(serializers.Field):

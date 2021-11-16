@@ -32,19 +32,15 @@ class ArticleListCreateAPIView(ListCreateAPIView):
     """Create &  List Articles"""
     permission_classes = [IsAuthenticatedOrReadOnly]
     parser_classes = (MultiPartParser, FormParser,)
-    filterset_fields = (
-        "author",
-        "title",
-        "content",
-        "slug",
-    )
+    filterset_fields = ("author", "title", "content", "slug")
+    ordering_fields = ("-created_at", )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.data = None
 
     def get_serializer(self, *args, **kwargs):
-        self.data = kwargs.get('data')
+        self.data = kwargs.get("data")
         return super().get_serializer(*args, **kwargs)
 
     def get_serializer_class(self):
@@ -56,8 +52,8 @@ class ArticleListCreateAPIView(ListCreateAPIView):
         if isinstance(self.request.user, get_user_model()):
             return Article.objects.filter(
                 Q(author=self.request.user) | Q(status=Article.PUBLISHED)
-            ).order_by("-created_at")
-        return Article.objects.filter(status=Article.PUBLISHED).order_by("-created_at")
+            )
+        return Article.objects.filter(status=Article.PUBLISHED)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -82,7 +78,7 @@ class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
         self.data = None
 
     def get_serializer(self, *args, **kwargs):
-        self.data = kwargs.get('data')
+        self.data = kwargs.get("data")
         return super().get_serializer(*args, **kwargs)
 
     def get_serializer_class(self):
@@ -96,7 +92,7 @@ class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
         return Article.objects.filter(status=Article.PUBLISHED)
 
     def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
+        partial = kwargs.pop("partial", False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
@@ -128,7 +124,7 @@ class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 
         self.perform_update(serializer)
 
-        if getattr(instance, '_prefetched_objects_cache', None):
+        if getattr(instance, "_prefetched_objects_cache", None):
             # If 'prefetch_related' has been applied to a queryset, we need to
             # forcibly invalidate the prefetch cache on the instance.
             instance._prefetched_objects_cache = {}
@@ -154,13 +150,13 @@ class ArticlePublishAPIView(CreateAPIView):
         # Only NON-Admin Authors can set PENDING status
         # (Asking for review from admins) ->
         if (not admin) and obj.status == Article.DRAFT:
-            # if user is not admin then it must be auhtor
+            # if user is not admin then it must be author
             obj.status = Article.PENDING
             obj.save()
         # Only Admin can publish articles with 'pending' status ->
         elif admin and obj.status == Article.PENDING:
             # By using clone mechanism, published articles remain
-            # intact untill their clone get published.
+            # intact until their clone get published.
             if original := obj.original:
                 # replacing original article with clone data
                 for field, value in model_to_dict(obj).items():
@@ -177,7 +173,7 @@ class ArticlePublishAPIView(CreateAPIView):
                 if obj.status == 1
                 else "Article is already published"
             )
-            # None of above case happends so its a bad request
+            # None of above case happens so its a bad request
             return Response(
                 {
                     "error": "article-publish",
@@ -254,7 +250,7 @@ class CourseListCreateAPIView(ListCreateAPIView):
         self.data = None
 
     def get_serializer(self, *args, **kwargs):
-        self.data = kwargs.get('data')
+        self.data = kwargs.get("data")
         return super().get_serializer(*args, **kwargs)
 
     def get_serializer_class(self):
