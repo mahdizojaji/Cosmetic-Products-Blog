@@ -16,4 +16,6 @@ urlpatterns = [
     # Courses
     path("courses/", views.CourseListCreateAPIView.as_view(), name="course_list_create"),
     path("courses/<uuid:uuid>/", views.CourseRetrieveAPIView.as_view(), name="course_retrieve"),
+    path("courses/<uuid:uuid>/publish/", views.CoursePublishAPIView.as_view(), name="course_publish"),
+    # TODO: Add comments & rate to courses
 ]

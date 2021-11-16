@@ -6,9 +6,11 @@ from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView, RetrieveAPIView
+from rest_framework.generics import (
+    ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView, RetrieveAPIView, GenericAPIView
+)
 
-from extensions.permissions import OwnerAndAdmin, OwnerAndAdminOrReadOnly
+from extensions.permissions import OwnerAndAdmin, OwnerAndAdminOrReadOnly, IsAdmin
 
 from .models import Article, Course
 from .filters import CourseFilter
@@ -77,6 +79,7 @@ class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
             serializer.save()
 
 
+# TODO: Use GenericAPIView instead CreateAPIView for some views
 class ArticlePublishAPIView(CreateAPIView):
     """Change Article Status to PUBLISHED"""
 
@@ -177,6 +180,7 @@ class ArticleIncreaseShareAPIView(CreateAPIView):
 
 class CourseListCreateAPIView(ListCreateAPIView):
     """List & Create Course"""
+    # TODO: Convert some Authenticated permissions to FullProfile Permission
     permission_classes = [IsAuthenticatedOrReadOnly]
     filterset_class = CourseFilter
     search_fields = ("title", "content")
@@ -238,3 +242,19 @@ class CourseRetrieveAPIView(RetrieveAPIView):
     queryset = Course.objects.all()
     lookup_field = "uuid"
     serializer_class = CourseSerializer
+
+
+class CoursePublishAPIView(GenericAPIView):
+    """Change course Status to PUBLISHED"""
+
+    queryset = Course.objects.all()
+    serializer_class = CourseSerializer
+    permission_classes = [IsAdmin]
+    lookup_field = "uuid"
+
+    def get(self, request, *args, **kwargs):
+        obj = self.get_object()
+        obj.status = Article.PUBLISHED
+        obj.save()
+        serializer = self.get_serializer(instance=obj)
+        return Response(serializer.data, status=status.HTTP_200_OK)

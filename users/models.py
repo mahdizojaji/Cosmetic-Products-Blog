@@ -120,6 +120,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     cover_img = ImageField(
         upload_to="images/users/covers/", height_field=None, width_field=None
     )
+    # TODO: fix: Convert province to integer field
     province = CharField(max_length=30, choices=iran_provinces, null=True)
     city = CharField(max_length=30, null=True)
     vip_expire = BigIntegerField(default=0, blank=True)

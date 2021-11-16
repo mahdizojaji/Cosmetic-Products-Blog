@@ -6,6 +6,11 @@ from blog.models import Article
 User = get_user_model()
 
 
+class IsAdmin(IsAuthenticated):
+    def has_permission(self, request, view):
+        return request.user.is_superuser
+
+
 class OwnerAndAdmin(IsAuthenticated):
     """This permissions is only True for
     Authenticated Admin or Owner itself"""
