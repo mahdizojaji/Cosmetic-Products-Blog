@@ -16,4 +16,4 @@ class Comment(models.Model):
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey("content_type", "object_id")
     created_at = models.DateTimeField(auto_now_add=True)
-    # TODO: add updated_at field
+    updated_at = models.DateTimeField(auto_now=True)
