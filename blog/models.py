@@ -110,6 +110,10 @@ class Course(models.Model):
     cost = models.PositiveIntegerField(verbose_name='Cost', default=0)
     is_online = models.BooleanField(verbose_name='Is Online')
     quantity = models.PositiveIntegerField(verbose_name='Quantity', validators=[MinValueValidator(1)])
+    comments = GenericRelation(Comment, null=True, blank=True)
+    rate = models.DecimalField(max_digits=2, decimal_places=1, default=0)
+    rate_points = models.PositiveBigIntegerField(default=0)
+    rate_counts = models.PositiveBigIntegerField(default=0)
     # online course fields:
     sessions = GenericRelation(MediaFile, null=True, blank=True)
     # offline course fields:

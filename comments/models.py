@@ -12,7 +12,11 @@ class Comment(models.Model):
     text = models.CharField(max_length=100)
     author = models.ForeignKey(to=get_user_model(), on_delete=models.CASCADE, related_name="comments")
     rate = models.SmallIntegerField(validators=[MaxValueValidator(5), MinValueValidator(1)], blank=True, null=True)
-    content_type = models.ForeignKey(ContentType, limit_choices_to={"model__in": ["article"]}, on_delete=models.CASCADE)
+    content_type = models.ForeignKey(
+        to=ContentType,
+        limit_choices_to={"model__in": ["article", "course"]},
+        on_delete=models.CASCADE
+    )
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey("content_type", "object_id")
     created_at = models.DateTimeField(auto_now_add=True)
