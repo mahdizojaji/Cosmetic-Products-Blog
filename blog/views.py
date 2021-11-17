@@ -318,4 +318,4 @@ class CoursePublishAPIView(GenericAPIView):
 
 class CourseCommentListCreateAPIView(CommentListCreateAbstractView):
     queryset = Course.objects.all()
-    serializer_class = CommentSerializer
+    serializer_class = CommentAndRateSerializer
