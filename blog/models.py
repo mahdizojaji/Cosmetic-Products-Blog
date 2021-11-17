@@ -57,7 +57,6 @@ class Article(models.Model):
     PUBLISHED = 2
     STATUS_CHOICES = (
         (DRAFT, "Draft"),
-        # TODO: Not all fields need to be complete in draft state & it should check in make publish API.
         (PENDING, "Pending"),
         (PUBLISHED, "Published"),
     )

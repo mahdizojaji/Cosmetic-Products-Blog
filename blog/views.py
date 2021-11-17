@@ -137,8 +137,6 @@ class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 class ArticlePublishAPIView(CreateAPIView):
     """Change Article Status to PUBLISHED"""
 
-    # TODO: Check all required fields are filled
-
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
     permission_classes = [OwnerAndAdmin]
@@ -155,6 +153,16 @@ class ArticlePublishAPIView(CreateAPIView):
             obj.save()
         # Only Admin can publish articles with 'pending' status ->
         elif admin and obj.status == Article.PENDING:
+            # checking required fields for publishing ->
+            if not obj.content:
+                return Response(
+                {
+                    "error": "article-publish",
+                    "message": "You can't publish an article without content.",
+                    "detail": "Article content is required.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
             # By using clone mechanism, published articles remain
             # intact until their clone get published.
             if original := obj.original:
@@ -169,7 +177,7 @@ class ArticlePublishAPIView(CreateAPIView):
                 obj.save()
         else:
             detail = (
-                "You dont have permission to publish a pending article."
+                "You dont have permission to publish or article is already pending."
                 if obj.status == 1
                 else "Article is already published"
             )
