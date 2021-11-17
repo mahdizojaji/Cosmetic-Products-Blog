@@ -26,3 +26,6 @@ class CommentAndRateSerializer(CommentSerializer):
         model = Comment
         fields = ("uuid", "author", "related", "created_at", "text", "rate")
         read_only_fields = ("uuid", "author", "related", "created_at")
+        extra_kwargs = {
+            "rate": {"required": True},
+        }

@@ -18,14 +18,11 @@ class CommentListCreateAbstractView(ListCreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        rate = None
-        if isinstance(self.get_serializer_class(), CommentAndRateSerializer):
-            rate = serializer.validated_data["rate"]
         comment = Comment(
             content_object=self.get_object(),
             author=request.user,
             text=serializer.validated_data["text"],
-            rate=rate,
+            rate=serializer.validated_data.get("rate"),
             created_at=timezone.now(),
         )
         comment.save()

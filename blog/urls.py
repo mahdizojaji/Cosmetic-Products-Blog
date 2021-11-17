@@ -14,10 +14,11 @@ urlpatterns = [
     path("articles/<uuid:uuid>/share/", views.ArticleIncreaseShareAPIView.as_view(), name="articles_increase_share"),
     path("articles/<uuid:uuid>/publish/", views.ArticlePublishAPIView.as_view(), name="articles_publish"),
     path("articles/<uuid:uuid>/comments/", views.ArticleCommentListCreateAPIView.as_view(),
-         name="comments_list_create"),
+         name="articles_comments_list_create"),
     # Courses
     path("courses/", views.CourseListCreateAPIView.as_view(), name="course_list_create"),
     path("courses/<uuid:uuid>/", views.CourseRetrieveAPIView.as_view(), name="course_retrieve"),
     path("courses/<uuid:uuid>/publish/", views.CoursePublishAPIView.as_view(), name="course_publish"),
-    # TODO: Add comments & rate to courses
+    path("courses/<uuid:uuid>/comments/", views.CourseCommentListCreateAPIView.as_view(),
+         name="course_comments_list_create"),
 ]

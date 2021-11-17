@@ -314,3 +314,8 @@ class CoursePublishAPIView(GenericAPIView):
         obj.save()
         serializer = self.get_serializer(instance=obj)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CourseCommentListCreateAPIView(CommentListCreateAbstractView):
+    queryset = Course.objects.all()
+    serializer_class = CommentAndRateSerializer

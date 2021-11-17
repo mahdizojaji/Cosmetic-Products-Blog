@@ -53,6 +53,7 @@ def comment_pre_save(sender, instance, **kwargs):
     # adding rate to object and save it ->
     apply_rate(obj, instance.rate)
     obj.save()
+    obj.author.save()
 
 
 @receiver(post_delete, sender=Comment)
@@ -65,3 +66,4 @@ def comment_post_delete(sender, instance, **kwargs):
     # adding rate to object and save it ->
     apply_rate(obj, instance.rate, True)
     obj.save()
+    obj.author.save()
