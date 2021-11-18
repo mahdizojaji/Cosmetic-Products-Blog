@@ -5,12 +5,11 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.generics import (
     ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView, RetrieveAPIView, GenericAPIView
 )
 
-from extensions.permissions import OwnerAndAdmin, OwnerAndAdminOrReadOnly, IsAdmin
+from extensions.permissions import OwnerAndAdmin, OwnerAndAdminOrReadOnly, IsAdmin, FullProfile, FullProfileOrReadOnly
 from comments.views import CommentListCreateAbstractView
 from comments.serializers import CommentSerializer, CommentAndRateSerializer
 
@@ -30,7 +29,7 @@ class ArticleCommentListCreateAPIView(CommentListCreateAbstractView):
 
 class ArticleListCreateAPIView(ListCreateAPIView):
     """Create &  List Articles"""
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [FullProfileOrReadOnly]
     parser_classes = (MultiPartParser, FormParser,)
     filterset_fields = ("author", "title", "content", "slug")
     ordering_fields = ("-created_at", )
@@ -69,7 +68,7 @@ class ArticleListCreateAPIView(ListCreateAPIView):
 
 class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     """Retrieve, Update & Delete Articles"""
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [FullProfileOrReadOnly]
     parser_classes = (MultiPartParser, FormParser,)
     lookup_field = "uuid"
 
@@ -201,7 +200,7 @@ class ArticlePublishAPIView(GenericAPIView):
 class ArticleLikeAPIView(CreateAPIView):
     """Like & Unlike an Article"""
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [FullProfile]
     queryset = Article.objects.all()
     lookup_field = "uuid"
 
@@ -218,7 +217,7 @@ class ArticleLikeAPIView(CreateAPIView):
 class ArticleBookmarkAPIView(CreateAPIView):
     """Bookmark & Un-bookmark an Article"""
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [FullProfile]
     queryset = Article.objects.all()
     lookup_field = "uuid"
 
@@ -235,7 +234,7 @@ class ArticleBookmarkAPIView(CreateAPIView):
 class ArticleIncreaseShareAPIView(CreateAPIView):
     """Increase Article Share Count"""
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [FullProfile]
     queryset = Article.objects.all()
     lookup_field = "uuid"
 
@@ -248,8 +247,8 @@ class ArticleIncreaseShareAPIView(CreateAPIView):
 
 class CourseListCreateAPIView(ListCreateAPIView):
     """List & Create Course"""
-    # TODO: Convert some Authenticated permissions to FullProfile Permission
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    
+    permission_classes = [FullProfileOrReadOnly]
     filterset_class = CourseFilter
     search_fields = ("title", "content")
     parser_classes = (MultiPartParser, FormParser,)
