@@ -32,7 +32,7 @@ class UserLikeAPIView(CreateAPIView):
     def create(self, request, *args, **kwargs):
         user_profile = self.get_object()
         user = request.user
-        if user in user_profile.liked_by.all():  # TODO: Fix Query
+        if User.objects.filter(uuid=user_profile.uuid, liked_by__in=[user]).exists():
             user_profile.liked_by.remove(user)
         else:
             user_profile.liked_by.add(user)
@@ -47,7 +47,7 @@ class UserBookmarkAPIView(CreateAPIView):
     def create(self, request, *args, **kwargs):
         user_profile = self.get_object()
         user = request.user
-        if user in user_profile.bookmarked_by.all():  # TODO: Fix Query
+        if User.objects.filter(uuid=user_profile.uuid, bookmarked_by__in=[user]).exists():
             user_profile.bookmarked_by.remove(user)
         else:
             user_profile.bookmarked_by.add(user)
