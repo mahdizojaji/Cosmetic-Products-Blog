@@ -5,12 +5,11 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.generics import (
     ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView, RetrieveAPIView, GenericAPIView
 )
 
-from extensions.permissions import OwnerAndAdmin, OwnerAndAdminOrReadOnly, IsAdmin
+from extensions.permissions import OwnerAndAdmin, OwnerAndAdminOrReadOnly, IsAdmin, FullProfile, FullProfileOrReadOnly
 from comments.views import CommentListCreateAbstractView
 from comments.serializers import CommentSerializer, CommentAndRateSerializer
 
@@ -30,7 +29,7 @@ class ArticleCommentListCreateAPIView(CommentListCreateAbstractView):
 
 class ArticleListCreateAPIView(ListCreateAPIView):
     """Create &  List Articles"""
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [FullProfileOrReadOnly]
     parser_classes = (MultiPartParser, FormParser,)
     filterset_fields = ("author", "title", "content", "slug")
     ordering_fields = ("-created_at", )
@@ -69,7 +68,7 @@ class ArticleListCreateAPIView(ListCreateAPIView):
 
 class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     """Retrieve, Update & Delete Articles"""
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [FullProfileOrReadOnly]
     parser_classes = (MultiPartParser, FormParser,)
     lookup_field = "uuid"
 
@@ -100,6 +99,7 @@ class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
         _status = serializer.instance.status
 
         if (_status == Article.PENDING) and (not admin):
+            # preventing update of published article
             return Response(
                 {
                     "error": "article-pending",
@@ -109,7 +109,8 @@ class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
         elif _status == Article.PUBLISHED:
-            if serializer.instance.clone:
+            if instance.clone:
+                # preventing update of published article
                 return Response(
                     {
                         "error": "article-pending",
@@ -118,78 +119,88 @@ class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
                     },
                     status=status.HTTP_403_FORBIDDEN,
                 )
+            # creating temporary clone from input instance
             data = serializer.validated_data
             data["status"] = Article.PENDING
+            data["original"] = instance
             Article.objects.create(**data)
-
-        self.perform_update(serializer)
+            # instance remaind intact
+        else:
+            # unlimited normal update for draft articles
+            self.perform_update(serializer)
 
         if getattr(instance, "_prefetched_objects_cache", None):
-            # If 'prefetch_related' has been applied to a queryset, we need to
-            # forcibly invalidate the prefetch cache on the instance.
             instance._prefetched_objects_cache = {}
 
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
 
-# TODO: Use GenericAPIView instead CreateAPIView for some views
-class ArticlePublishAPIView(CreateAPIView):
+class ArticlePublishAPIView(GenericAPIView):
     """Change Article Status to PUBLISHED"""
-
-    # TODO: Check all required fields are filled
 
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
     permission_classes = [OwnerAndAdmin]
     lookup_field = "uuid"
-
-    def create(self, request, *args, **kwargs):
-        obj = self.get_object()
-        admin = request.user.is_superuser
-        # Only NON-Admin Authors can set PENDING status
-        # (Asking for review from admins) ->
-        if (not admin) and obj.status == Article.DRAFT:
-            # if user is not admin then it must be author
-            obj.status = Article.PENDING
-            obj.save()
-        # Only Admin can publish articles with 'pending' status ->
-        elif admin and obj.status == Article.PENDING:
-            # By using clone mechanism, published articles remain
-            # intact until their clone get published.
-            if original := obj.original:
-                # replacing original article with clone data
-                for field, value in model_to_dict(obj).items():
-                    setattr(original, field, value)
+    
+    def publish(self):
+        if self.obj.content:
+            if original := self.obj.original:
+                update_fields = ("title", "content", "images", "videos")
+                # By using clone mechanism, published articles remain
+                # intact until their clone get published.
+                for field, value in model_to_dict(self.obj).items():
+                    if field in update_fields:
+                        # replacing original article with clone data
+                        setattr(original, field, value)
                 original.save()
                 # removing temp clone
-                obj.delete()
+                self.obj.delete()
             else:
-                obj.status = Article.PUBLISHED
-                obj.save()
+                self.obj.status = Article.PUBLISHED
+                self.obj.save()
         else:
-            detail = (
-                "You dont have permission to publish a pending article."
-                if obj.status == 1
-                else "Article is already published"
-            )
-            # None of above case happens so its a bad request
+            self.detail = "Article content is required."
+
+    def post(self, request, *args, **kwargs):
+        self.detail = None
+        obj = self.obj = self.get_object()
+        # DRAFT
+        if obj.status is Article.DRAFT:
+            if request.user.is_superuser:
+                # goes straight to publish
+                self.publish()
+            else:
+                # only gets pending
+                obj.status = Article.PENDING
+                obj.save()
+        # PENDING        
+        elif obj.status is Article.PENDING:
+            if request.user.is_superuser:
+                # publish
+                self.publish()
+            else:
+                self.detail = "You dont have permission to publish articles."
+        # PUBLISHED
+        elif obj.status is Article.PUBLISHED:
+            self.detail = "Article is already published!"
+        if self.detail:
             return Response(
                 {
                     "error": "article-publish",
-                    "message": "You have to be Admin or Article must be draft.",
-                    "detail": detail,
+                    "message": "You cant publish this article.",
+                    "detail": self.detail,
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        # The happy ending! ->
         return Response(status=status.HTTP_200_OK)
 
 
 class ArticleLikeAPIView(CreateAPIView):
     """Like & Unlike an Article"""
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [FullProfile]
     queryset = Article.objects.all()
     lookup_field = "uuid"
 
@@ -206,7 +217,7 @@ class ArticleLikeAPIView(CreateAPIView):
 class ArticleBookmarkAPIView(CreateAPIView):
     """Bookmark & Un-bookmark an Article"""
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [FullProfile]
     queryset = Article.objects.all()
     lookup_field = "uuid"
 
@@ -223,7 +234,7 @@ class ArticleBookmarkAPIView(CreateAPIView):
 class ArticleIncreaseShareAPIView(CreateAPIView):
     """Increase Article Share Count"""
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [FullProfile]
     queryset = Article.objects.all()
     lookup_field = "uuid"
 
@@ -236,8 +247,8 @@ class ArticleIncreaseShareAPIView(CreateAPIView):
 
 class CourseListCreateAPIView(ListCreateAPIView):
     """List & Create Course"""
-    # TODO: Convert some Authenticated permissions to FullProfile Permission
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    
+    permission_classes = [FullProfileOrReadOnly]
     filterset_class = CourseFilter
     search_fields = ("title", "content")
     parser_classes = (MultiPartParser, FormParser,)

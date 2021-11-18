@@ -19,6 +19,7 @@ from django.db.models import (
     DecimalField,
     PositiveBigIntegerField,
 )
+from django.db.models.fields import IntegerField
 
 from config.settings import PHONE_NUMBER_PATTERN
 
@@ -127,9 +128,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         null=True,
         blank=True,
     )
-    province = CharField(max_length=30, choices=iran_provinces, blank=True, null=True)
+    province = IntegerField(choices=iran_provinces, blank=True, null=True)
     city = CharField(max_length=30, blank=True, null=True)
-    # TODO: fix: Convert province to integer field
     vip_expire = BigIntegerField(default=0, blank=True)
     liked_by = ManyToManyField("self", related_name="liked_users", blank=True)
     bookmarked_by = ManyToManyField("self", related_name="bookmarked_users", blank=True)

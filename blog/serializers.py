@@ -68,7 +68,6 @@ class ArticleAbstractSerializer(serializers.ModelSerializer):
 
 
 class ArticleSerializer(ArticleAbstractSerializer):
-    # TODO: Fix: title is required in update articles
     class Meta:
         model = Article
         fields = (

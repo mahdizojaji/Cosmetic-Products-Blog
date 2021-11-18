@@ -56,7 +56,7 @@ class OwnerOrAdminOrAuthorOrReadOnly(IsAuthenticated):
 
         if isinstance(obj, (Article, Comment)) and obj.author == request.user:
             return True
-        
+
         if isinstance(obj, Comment) and obj.content_object.author == request.user:
             return True
 
@@ -64,3 +64,29 @@ class OwnerOrAdminOrAuthorOrReadOnly(IsAuthenticated):
             return True
 
         return False
+
+
+class FullProfile(IsAuthenticated):
+    def has_permission(self, request, view):
+        user = request.user
+        return all(
+            user.birth_date,
+            user.fname,
+            user.lname,
+            user.city,
+            user.province,
+            user.avatar_img,
+        )
+
+
+class FullProfileOrReadOnly(IsAuthenticated):
+    def has_permission(self, request, view):
+        user = request.user
+        return all(
+            user.birth_date,
+            user.fname,
+            user.lname,
+            user.city,
+            user.province,
+            user.avatar_img,
+        ) or request.method in SAFE_METHODS
