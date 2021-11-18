@@ -100,6 +100,7 @@ class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
         _status = serializer.instance.status
 
         if (_status == Article.PENDING) and (not admin):
+            # preventing update of published article
             return Response(
                 {
                     "error": "article-pending",
@@ -109,7 +110,8 @@ class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
         elif _status == Article.PUBLISHED:
-            if serializer.instance.clone:
+            if instance.clone:
+                # preventing update of published article
                 return Response(
                     {
                         "error": "article-pending",
@@ -118,79 +120,81 @@ class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
                     },
                     status=status.HTTP_403_FORBIDDEN,
                 )
+            # creating temporary clone from input instance
             data = serializer.validated_data
             data["status"] = Article.PENDING
+            data["original"] = instance
             Article.objects.create(**data)
-
-        self.perform_update(serializer)
+            # instance remaind intact
+        else:
+            # unlimited normal update for draft articles
+            self.perform_update(serializer)
 
         if getattr(instance, "_prefetched_objects_cache", None):
-            # If 'prefetch_related' has been applied to a queryset, we need to
-            # forcibly invalidate the prefetch cache on the instance.
             instance._prefetched_objects_cache = {}
 
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
 
-# TODO: Use GenericAPIView instead CreateAPIView for some views
-class ArticlePublishAPIView(CreateAPIView):
+class ArticlePublishAPIView(GenericAPIView):
     """Change Article Status to PUBLISHED"""
 
     queryset = Article.objects.all()
     serializer_class = ArticleSerializer
     permission_classes = [OwnerAndAdmin]
     lookup_field = "uuid"
-
-    def create(self, request, *args, **kwargs):
-        obj = self.get_object()
-        admin = request.user.is_superuser
-        # Only NON-Admin Authors can set PENDING status
-        # (Asking for review from admins) ->
-        if (not admin) and obj.status == Article.DRAFT:
-            # if user is not admin then it must be author
-            obj.status = Article.PENDING
-            obj.save()
-        # Only Admin can publish articles with 'pending' status ->
-        elif admin and obj.status == Article.PENDING:
-            # checking required fields for publishing ->
-            if not obj.content:
-                return Response(
-                {
-                    "error": "article-publish",
-                    "message": "You can't publish an article without content.",
-                    "detail": "Article content is required.",
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-            # By using clone mechanism, published articles remain
-            # intact until their clone get published.
-            if original := obj.original:
-                # replacing original article with clone data
-                for field, value in model_to_dict(obj).items():
-                    setattr(original, field, value)
+    
+    def publish(self):
+        if self.obj.content:
+            if original := self.obj.original:
+                update_fields = ("title", "content", "images", "videos")
+                # By using clone mechanism, published articles remain
+                # intact until their clone get published.
+                for field, value in model_to_dict(self.obj).items():
+                    if field in update_fields:
+                        # replacing original article with clone data
+                        setattr(original, field, value)
                 original.save()
                 # removing temp clone
-                obj.delete()
+                self.obj.delete()
             else:
-                obj.status = Article.PUBLISHED
-                obj.save()
+                self.obj.status = Article.PUBLISHED
+                self.obj.save()
         else:
-            detail = (
-                "You dont have permission to publish or article is already pending."
-                if obj.status == 1
-                else "Article is already published"
-            )
-            # None of above case happens so its a bad request
+            self.detail = "Article content is required."
+
+    def post(self, request, *args, **kwargs):
+        self.detail = None
+        obj = self.obj = self.get_object()
+        # DRAFT
+        if obj.status is Article.DRAFT:
+            if request.user.is_superuser:
+                # goes straight to publish
+                self.publish()
+            else:
+                # only gets pending
+                obj.status = Article.PENDING
+                obj.save()
+        # PENDING        
+        elif obj.status is Article.PENDING:
+            if request.user.is_superuser:
+                # publish
+                self.publish()
+            else:
+                self.detail = "You dont have permission to publish articles."
+        # PUBLISHED
+        elif obj.status is Article.PUBLISHED:
+            self.detail = "Article is already published!"
+        if self.detail:
             return Response(
                 {
                     "error": "article-publish",
-                    "message": "You have to be Admin or Article must be draft.",
-                    "detail": detail,
+                    "message": "You cant publish this article.",
+                    "detail": self.detail,
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        # The happy ending! ->
         return Response(status=status.HTTP_200_OK)
 
 
