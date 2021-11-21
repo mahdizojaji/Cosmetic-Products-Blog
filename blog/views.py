@@ -207,10 +207,10 @@ class ArticleLikeAPIView(CreateAPIView):
     def create(self, request, *args, **kwargs):
         article = self.get_object()
         user = request.user
-        if Article.objects.filter(uuid=article.uuid, likes__in=[user]).exists():
-            article.likes.remove(user)
+        if Article.objects.filter(uuid=article.uuid, liked_by__in=[user]).exists():
+            article.liked_by.remove(user)
         else:
-            article.likes.add(user)
+            article.liked_by.add(user)
         return Response(status=status.HTTP_200_OK)
 
 
@@ -224,10 +224,10 @@ class ArticleBookmarkAPIView(CreateAPIView):
     def create(self, request, *args, **kwargs):
         article = self.get_object()
         user = request.user
-        if Article.objects.filter(uuid=article.uuid, bookmarks__in=[user]).exists():
-            article.bookmarks.remove(user)
+        if Article.objects.filter(uuid=article.uuid, bookmarked_by__in=[user]).exists():
+            article.bookmarked_by.remove(user)
         else:
-            article.bookmarks.add(user)
+            article.bookmarked_by.add(user)
         return Response(status=status.HTTP_200_OK)
 
 

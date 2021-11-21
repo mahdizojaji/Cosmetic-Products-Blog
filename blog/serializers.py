@@ -71,11 +71,11 @@ class ArticleSerializer(ArticleAbstractSerializer):
     class Meta:
         model = Article
         fields = (
-            "uuid", "author", "slug", "created_at", "updated_at", "likes", "bookmarks", "share_qty", "status", "rate",
+            "uuid", "author", "slug", "created_at", "updated_at", "liked_by", "bookmarked_by", "share_qty", "status", "rate",
             "rate_counts", "title", "content", "images", "videos",
         )
         read_only_fields = (
-            "uuid", "author", "slug", "created_at", "updated_at", "likes", "bookmarks", "share_qty", "status", "rate",
+            "uuid", "author", "slug", "created_at", "updated_at", "liked_by", "bookmarked_by", "share_qty", "status", "rate",
             "rate_counts", "images", "videos",
         )
 
