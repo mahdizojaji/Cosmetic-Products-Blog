@@ -69,24 +69,24 @@ class OwnerOrAdminOrAuthorOrReadOnly(IsAuthenticated):
 class FullProfile(IsAuthenticated):
     def has_permission(self, request, view):
         user = request.user
-        return all(
+        return all([
             user.birth_date,
             user.fname,
             user.lname,
             user.city,
             user.province,
             user.avatar_img,
-        )
+        ])
 
 
 class FullProfileOrReadOnly(IsAuthenticated):
     def has_permission(self, request, view):
         user = request.user
-        return all(
+        return all([
             user.birth_date,
             user.fname,
             user.lname,
             user.city,
             user.province,
             user.avatar_img,
-        ) or request.method in SAFE_METHODS
+        ]) or request.method in SAFE_METHODS
