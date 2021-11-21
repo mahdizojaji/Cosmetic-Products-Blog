@@ -28,12 +28,16 @@ class ArticleAbstractSerializer(serializers.ModelSerializer):
 
     def get_images(self, obj: Article):
         images = obj.images.filter(field_name=MediaFile.IMAGES)
-        serializer = MediaFileSerializer(instance=images, many=True, context=self.context)
+        serializer = MediaFileSerializer(
+            instance=images, many=True, context=self.context
+        )
         return serializer.data
 
     def get_videos(self, obj: Article):
         videos = obj.videos.filter(field_name=MediaFile.VIDEOS)
-        serializer = MediaFileSerializer(instance=videos, many=True, context=self.context)
+        serializer = MediaFileSerializer(
+            instance=videos, many=True, context=self.context
+        )
         return serializer.data
 
     def create(self, validated_data):
@@ -42,11 +46,17 @@ class ArticleAbstractSerializer(serializers.ModelSerializer):
         instance: Article = super().create(validated_data)
         for image in images:
             MediaFile.objects.create(
-                content_object=instance, file=image, field_name=MediaFile.IMAGES, author=instance.author,
+                content_object=instance,
+                file=image,
+                field_name=MediaFile.IMAGES,
+                author=instance.author,
             )
         for video in videos:
             MediaFile.objects.create(
-                content_object=instance, file=video, field_name=MediaFile.VIDEOS, author=instance.author,
+                content_object=instance,
+                file=video,
+                field_name=MediaFile.VIDEOS,
+                author=instance.author,
             )
         return instance
 
@@ -58,11 +68,17 @@ class ArticleAbstractSerializer(serializers.ModelSerializer):
         instance.videos.clear()
         for image in images:
             MediaFile.objects.create(
-                content_object=instance, file=image, field_name=MediaFile.IMAGES, author=instance.author,
+                content_object=instance,
+                file=image,
+                field_name=MediaFile.IMAGES,
+                author=instance.author,
             )
         for video in videos:
             MediaFile.objects.create(
-                content_object=instance, file=video, field_name=MediaFile.VIDEOS, author=instance.author,
+                content_object=instance,
+                file=video,
+                field_name=MediaFile.VIDEOS,
+                author=instance.author,
             )
         return instance
 
@@ -71,27 +87,55 @@ class ArticleSerializer(ArticleAbstractSerializer):
     shares = serializers.IntegerField(source="share_qty", read_only=True)
     likes = serializers.IntegerField(source="liked_by.count", read_only=True)
     bookmarks = serializers.IntegerField(source="bookmarked_by.count", read_only=True)
-    
+
     class Meta:
         model = Article
         fields = (
-            "uuid", "author", "slug", "created_at", "updated_at", "likes", "bookmarks", "shares", "status", "rate",
-            "rate_counts", "title", "content", "images", "videos",
+            "uuid",
+            "author",
+            "slug",
+            "created_at",
+            "updated_at",
+            "likes",
+            "bookmarks",
+            "shares",
+            "status",
+            "rate",
+            "rate_counts",
+            "title",
+            "content",
+            "images",
+            "videos",
         )
         read_only_fields = (
-            "uuid", "author", "slug", "created_at", "updated_at", "likes", "bookmarks", "shares", "status", "rate",
-            "rate_counts", "images", "videos",
+            "uuid",
+            "author",
+            "slug",
+            "created_at",
+            "updated_at",
+            "likes",
+            "bookmarks",
+            "shares",
+            "status",
+            "rate",
+            "rate_counts",
+            "images",
+            "videos",
         )
 
 
 class ArticleWriteSerializer(ArticleAbstractSerializer):
     images = serializers.ListField(
         required=False,
-        child=serializers.ImageField(required=False, allow_empty_file=False, use_url=False)
+        child=serializers.ImageField(
+            required=False, allow_empty_file=False, use_url=False
+        ),
     )
     videos = serializers.ListField(
         required=False,
-        child=serializers.FileField(required=False, allow_empty_file=False, use_url=False),
+        child=serializers.FileField(
+            required=False, allow_empty_file=False, use_url=False
+        ),
     )
 
     class Meta:
@@ -108,12 +152,16 @@ class CourseAbstractSerializer(serializers.ModelSerializer):
 
     def get_images(self, obj: Course):
         images = obj.images.filter(field_name=MediaFile.IMAGES)
-        serializer = MediaFileSerializer(instance=images, many=True, context=self.context)
+        serializer = MediaFileSerializer(
+            instance=images, many=True, context=self.context
+        )
         return serializer.data
 
     def get_videos(self, obj: Course):
         videos = obj.videos.filter(field_name=MediaFile.VIDEOS)
-        serializer = MediaFileSerializer(instance=videos, many=True, context=self.context)
+        serializer = MediaFileSerializer(
+            instance=videos, many=True, context=self.context
+        )
         return serializer.data
 
     def create(self, validated_data):
@@ -122,11 +170,17 @@ class CourseAbstractSerializer(serializers.ModelSerializer):
         instance: Course = super().create(validated_data)
         for image in images:
             MediaFile.objects.create(
-                content_object=instance, file=image, field_name=MediaFile.IMAGES, author=instance.author,
+                content_object=instance,
+                file=image,
+                field_name=MediaFile.IMAGES,
+                author=instance.author,
             )
         for video in videos:
             MediaFile.objects.create(
-                content_object=instance, file=video, field_name=MediaFile.VIDEOS, author=instance.author,
+                content_object=instance,
+                file=video,
+                field_name=MediaFile.VIDEOS,
+                author=instance.author,
             )
         return instance
 
@@ -137,7 +191,9 @@ class CourseSerializer(CourseAbstractSerializer):
 
     def get_sessions(self, obj: Course):
         sessions = obj.videos.filter(field_name=MediaFile.SESSIONS)
-        serializer = MediaFileSerializer(instance=sessions, many=True, context=self.context)
+        serializer = MediaFileSerializer(
+            instance=sessions, many=True, context=self.context
+        )
         return serializer.data
 
     class Meta:
@@ -147,16 +203,19 @@ class CourseSerializer(CourseAbstractSerializer):
 
 class OnlineCourseSerializer(CourseAbstractSerializer):
     images = serializers.ListField(
-        required=True,
-        child=serializers.ImageField(required=False)
+        required=True, child=serializers.ImageField(required=False)
     )
     videos = serializers.ListField(
         required=True,
-        child=serializers.FileField(required=False, allow_empty_file=False, use_url=False),
+        child=serializers.FileField(
+            required=False, allow_empty_file=False, use_url=False
+        ),
     )
     sessions = serializers.ListField(
         required=False,
-        child=serializers.FileField(required=False, allow_empty_file=False, use_url=False),
+        child=serializers.FileField(
+            required=False, allow_empty_file=False, use_url=False
+        ),
     )
 
     def validate(self, attrs):
@@ -165,7 +224,7 @@ class OnlineCourseSerializer(CourseAbstractSerializer):
             raise ValidationError(
                 detail={
                     "sessions": f"quantity({attrs['quantity']}) not equal quantity of sessions"
-                                f"({len(attrs['sessions'])})",
+                    f"({len(attrs['sessions'])})",
                 },
             )
         return attrs
@@ -175,7 +234,10 @@ class OnlineCourseSerializer(CourseAbstractSerializer):
         instance: Course = super().create(validated_data)
         for session in sessions:
             MediaFile.objects.create(
-                content_object=instance, file=session, field_name=MediaFile.SESSIONS, author=instance.author,
+                content_object=instance,
+                file=session,
+                field_name=MediaFile.SESSIONS,
+                author=instance.author,
             )
         return instance
 
@@ -192,12 +254,13 @@ class OnlineCourseSerializer(CourseAbstractSerializer):
 class OfflineCourseSerializer(CourseAbstractSerializer):
     deadline = TimestampField(required=True, validators=[FutureDateValidator()])
     images = serializers.ListField(
-        required=False,
-        child=serializers.ImageField(required=False)
+        required=False, child=serializers.ImageField(required=False)
     )
     videos = serializers.ListField(
         required=False,
-        child=serializers.FileField(required=False, allow_empty_file=False, use_url=False),
+        child=serializers.FileField(
+            required=False, allow_empty_file=False, use_url=False
+        ),
     )
 
     class Meta:
