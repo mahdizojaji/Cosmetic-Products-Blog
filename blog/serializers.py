@@ -68,14 +68,18 @@ class ArticleAbstractSerializer(serializers.ModelSerializer):
 
 
 class ArticleSerializer(ArticleAbstractSerializer):
+    shares = serializers.IntegerField(source="share_qty", read_only=True)
+    likes = serializers.IntegerField(source="liked_by.count", read_only=True)
+    bookmarks = serializers.IntegerField(source="bookmarked_by.count", read_only=True)
+    
     class Meta:
         model = Article
         fields = (
-            "uuid", "author", "slug", "created_at", "updated_at", "liked_by", "bookmarked_by", "share_qty", "status", "rate",
+            "uuid", "author", "slug", "created_at", "updated_at", "likes", "bookmarks", "shares", "status", "rate",
             "rate_counts", "title", "content", "images", "videos",
         )
         read_only_fields = (
-            "uuid", "author", "slug", "created_at", "updated_at", "liked_by", "bookmarked_by", "share_qty", "status", "rate",
+            "uuid", "author", "slug", "created_at", "updated_at", "likes", "bookmarks", "shares", "status", "rate",
             "rate_counts", "images", "videos",
         )
 
