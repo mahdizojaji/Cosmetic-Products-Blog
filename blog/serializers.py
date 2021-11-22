@@ -212,7 +212,7 @@ class CourseSerializer(CourseAbstractSerializer):
 
     class Meta:
         model = Course
-        exclude = ("id", "created_at", "updated_at")
+        exclude = ("id", "created_at", "updated_at", "rate_points")
 
 
 class OnlineCourseSerializer(CourseAbstractSerializer):
