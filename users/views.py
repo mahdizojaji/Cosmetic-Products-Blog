@@ -50,7 +50,9 @@ class UserBookmarkAPIView(CreateAPIView):
     def create(self, request, *args, **kwargs):
         user_profile = self.get_object()
         user = request.user
-        if User.objects.filter(uuid=user_profile.uuid, bookmarked_by__in=[user]).exists():
+        if User.objects.filter(
+            uuid=user_profile.uuid, bookmarked_by__in=[user]
+        ).exists():
             user_profile.bookmarked_by.remove(user)
         else:
             user_profile.bookmarked_by.add(user)

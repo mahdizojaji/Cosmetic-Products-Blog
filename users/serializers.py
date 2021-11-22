@@ -15,11 +15,38 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            "uuid", "phone_number", "email", "birth_date", "fname", "lname", "avatar_img", "cover_img", "province",
-            "city", "shares", "likes", "bookmarks", "vip_expire", "is_superuser",
+            "uuid",
+            "phone_number",
+            "email",
+            "birth_date",
+            "fname",
+            "lname",
+            "avatar_img",
+            "cover_img",
+            "province",
+            "city",
+            "shares",
+            "likes",
+            "bookmarks",
+            "vip_expire",
+            "is_superuser",
         )
-        private_fields = ("phone_number", "email", "birth_date", "vip_expire", "is_superuser")
-        read_only_fields = ("uuid", "phone_number", "shares", "likes", "bookmarks", "vip_expire", "is_superuser")
+        private_fields = (
+            "phone_number",
+            "email",
+            "birth_date",
+            "vip_expire",
+            "is_superuser",
+        )
+        read_only_fields = (
+            "uuid",
+            "phone_number",
+            "shares",
+            "likes",
+            "bookmarks",
+            "vip_expire",
+            "is_superuser",
+        )
 
     def get_fields(self):
         fields = {}
