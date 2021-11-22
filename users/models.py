@@ -1,5 +1,6 @@
 import uuid
 
+from django.urls import reverse
 from django.contrib.auth.models import (
     AbstractBaseUser,
     BaseUserManager,
@@ -153,3 +154,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.phone_number
+    
+    def name(self):
+        return f"{self.fname} {self.lname}"
+    
+    def get_absolute_url(self):
+        return reverse("users:user_retrieve", kwargs={"uuid": self.uuid})
+    

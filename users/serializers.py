@@ -74,3 +74,15 @@ class UserSerializer(serializers.ModelSerializer):
                 fields[key] = value
                 fields[key].read_only = True
         return fields
+
+
+class AuthorReadOnlySerializer(serializers.ModelSerializer):
+    url = serializers.SerializerMethodField()
+    
+    def get_url(self, obj):
+        request = self.context["request"]
+        return obj.get_absolute_url()
+        
+    class Meta:
+        model = User
+        fields = ("uuid", "avatar_img", "name", "bio", "job_title","url")  # url

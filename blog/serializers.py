@@ -5,6 +5,7 @@ from extensions.serializer_fields import TimestampField
 from extensions.validators import FutureDateValidator
 
 from .models import Article, Course, MediaFile
+from users.serializers import AuthorReadOnlySerializer
 
 
 class MediaFileSerializer(serializers.ModelSerializer):
@@ -21,10 +22,17 @@ class MediaFileSerializer(serializers.ModelSerializer):
 
 
 class ArticleAbstractSerializer(serializers.ModelSerializer):
-    author = serializers.ReadOnlyField(source="author.uuid")
     status = serializers.ReadOnlyField(source="get_status_display")
     images = serializers.SerializerMethodField()
     videos = serializers.SerializerMethodField()
+    author = serializers.SerializerMethodField()
+    
+    def get_author(self, obj:Article):
+        serializer = AuthorReadOnlySerializer(
+            instance=obj.author,context=self.context
+        )
+        return serializer.data
+        
 
     def get_images(self, obj: Article):
         images = obj.images.filter(field_name=MediaFile.IMAGES)
