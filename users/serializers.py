@@ -35,6 +35,8 @@ class UserSerializer(serializers.ModelSerializer):
             "rate_counts",
             "comment_counts",
             "share_counts",
+            "job_title",
+            "bio",
             "vip_expire",
             "is_superuser",
         )

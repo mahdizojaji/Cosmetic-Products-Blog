@@ -114,6 +114,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     birth_date = DateField(null=True, blank=True)
     fname = CharField(max_length=30, null=True, blank=True)
     lname = CharField(max_length=30, null=True, blank=True)
+    job_title = CharField(max_length=30, null=True, blank=True)
+    bio = CharField(max_length=80, null=True, blank=True)
     avatar_img = ImageField(
         upload_to="users/avatars/",
         height_field=None,
