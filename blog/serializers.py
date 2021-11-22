@@ -89,12 +89,16 @@ class ArticleSerializer(ArticleAbstractSerializer):
     bookmarks = serializers.IntegerField(source="bookmarked_by.count", read_only=True)
     is_liked = serializers.SerializerMethodField()
     is_bookmarked = serializers.SerializerMethodField()
-
+    comment_counts = serializers.SerializerMethodField()
+    
     def get_is_liked(self, obj: Article):
         return obj.liked_by.filter(uuid=self.context["request"].user.uuid).exists()
 
     def get_is_bookmarked(self, obj: Article):
         return obj.bookmarked_by.filter(uuid=self.context["request"].user.uuid).exists()
+    
+    def get_comment_counts(self, obj: Article):
+        return obj.comments.count()
 
     class Meta:
         model = Article
@@ -112,6 +116,7 @@ class ArticleSerializer(ArticleAbstractSerializer):
             "status",
             "rate",
             "rate_counts",
+            "comment_counts",
             "title",
             "content",
             "images",
@@ -131,6 +136,7 @@ class ArticleSerializer(ArticleAbstractSerializer):
             "status",
             "rate",
             "rate_counts",
+            "comment_counts",
             "images",
             "videos",
         )
