@@ -8,9 +8,13 @@ User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
-    shares = serializers.IntegerField(source="share_qty", read_only=True)
+    comment_counts = serializers.IntegerField(source="comment_qty", read_only=True)
+    share_counts = serializers.IntegerField(source="share_qty", read_only=True)
     likes = serializers.IntegerField(source="liked_by.count", read_only=True)
     bookmarks = serializers.IntegerField(source="bookmarked_by.count", read_only=True)
+
+    def get_comment_counts(self, obj):
+        return obj.comments.count()
 
     class Meta:
         model = User
@@ -25,9 +29,12 @@ class UserSerializer(serializers.ModelSerializer):
             "cover_img",
             "province",
             "city",
-            "shares",
             "likes",
             "bookmarks",
+            "rate",
+            "rate_counts",
+            "comment_counts",
+            "share_counts",
             "vip_expire",
             "is_superuser",
         )
@@ -41,9 +48,12 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = (
             "uuid",
             "phone_number",
-            "shares",
             "likes",
             "bookmarks",
+            "rate",
+            "rate_counts",
+            "comment_counts",
+            "share_counts",
             "vip_expire",
             "is_superuser",
         )

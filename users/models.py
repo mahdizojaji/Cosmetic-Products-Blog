@@ -134,6 +134,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     liked_by = ManyToManyField("self", related_name="liked_users", blank=True)
     bookmarked_by = ManyToManyField("self", related_name="bookmarked_users", blank=True)
     share_qty = BigIntegerField(default=0, blank=True)
+    comment_qty = BigIntegerField(default=0, blank=True)
     rate = DecimalField(max_digits=2, decimal_places=1, default=0)
     rate_points = PositiveBigIntegerField(default=0)
     rate_counts = PositiveBigIntegerField(default=0)
