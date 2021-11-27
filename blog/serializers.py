@@ -171,6 +171,13 @@ class CourseAbstractSerializer(serializers.ModelSerializer):
     status = serializers.ReadOnlyField(source="get_status_display")
     images = serializers.SerializerMethodField()
     videos = serializers.SerializerMethodField()
+    author = serializers.SerializerMethodField()
+    
+    def get_author(self, obj:Article):
+        serializer = AuthorReadOnlySerializer(
+            instance=obj.author,context=self.context
+        )
+        return serializer.data
 
     def get_images(self, obj: Course):
         images = obj.images.filter(field_name=MediaFile.IMAGES)
