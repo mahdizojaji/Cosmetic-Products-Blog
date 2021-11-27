@@ -23,7 +23,7 @@ User = get_user_model()
 
 
 class ArticleCommentListCreateAPIView(CommentListCreateAbstractView):
-    queryset = Article.objects.all()
+    queryset = Article.objects.filter(status=Article.PUBLISHED)
     serializer_class = CommentSerializer
 
 
@@ -201,7 +201,7 @@ class ArticleLikeAPIView(CreateAPIView):
     """Like & Unlike an Article"""
 
     permission_classes = [FullProfile]
-    queryset = Article.objects.all()
+    queryset = Article.objects.filter(status=Article.PUBLISHED)
     lookup_field = "uuid"
 
     def create(self, request, *args, **kwargs):
@@ -218,7 +218,7 @@ class ArticleBookmarkAPIView(CreateAPIView):
     """Bookmark & Un-bookmark an Article"""
 
     permission_classes = [FullProfile]
-    queryset = Article.objects.all()
+    queryset = Article.objects.filter(status=Article.PUBLISHED)
     lookup_field = "uuid"
 
     def create(self, request, *args, **kwargs):
@@ -235,7 +235,7 @@ class ArticleIncreaseShareAPIView(CreateAPIView):
     """Increase Article Share Count"""
 
     permission_classes = [FullProfile]
-    queryset = Article.objects.all()
+    queryset = Article.objects.filter(status=Article.PUBLISHED)
     lookup_field = "uuid"
 
     def create(self, request, *args, **kwargs):
