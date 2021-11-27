@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-
+from django.urls import reverse
 from rest_framework import serializers
 
 from extensions.permissions import OwnerAndAdmin
@@ -78,11 +78,10 @@ class UserSerializer(serializers.ModelSerializer):
 
 class AuthorReadOnlySerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField()
-    
-    def get_url(self, obj):
-        request = self.context["request"]
-        return obj.get_absolute_url()
-        
+
+    def get_url(self, obj: User):
+        return self.context["request"].build_absolute_uri(obj.reverse_url())
+
     class Meta:
         model = User
-        fields = ("uuid", "avatar_img", "name", "bio", "job_title","url")  # url
+        fields = ("uuid", "avatar_img", "name", "bio", "job_title", "url")

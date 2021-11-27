@@ -33,7 +33,7 @@ class UserManager(BaseUserManager):
         is_staff=False,
         is_superuser=False,
         is_active=True,
-        **extra_fields
+        **extra_fields,
     ):
         if not phone_number:
             raise ValueError("Users must have a phone_number")
@@ -154,10 +154,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.phone_number
-    
+
     def name(self):
         return f"{self.fname} {self.lname}"
-    
-    def get_absolute_url(self):
+
+    def reverse_url(self):
         return reverse("users:user_retrieve", kwargs={"uuid": self.uuid})
-    
