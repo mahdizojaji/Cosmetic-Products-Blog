@@ -50,7 +50,7 @@ class ArticleListCreateAPIView(ListCreateAPIView):
         return ArticleSerializer
 
     def get_queryset(self):
-        if isinstance(self.request.user, get_user_model()):
+        if self.request.user.is_authenticated:
             return Article.objects.filter(
                 Q(author=self.request.user) | Q(status=Article.PUBLISHED)
             )
@@ -88,8 +88,11 @@ class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
         return ArticleSerializer
 
     def get_queryset(self):
-        if isinstance(self.request.user, get_user_model()):
-            return Article.objects.filter(Q(author=self.request.user) | Q(status=Article.PUBLISHED))
+        if self.request.user.is_authenticated:
+            if self.request.user.is_superuser:
+                return Article.objects.all()
+            else:
+                return Article.objects.filter(Q(author=self.request.user) | Q(status=Article.PUBLISHED))
         return Article.objects.filter(status=Article.PUBLISHED)
 
     def update(self, request, *args, **kwargs):
@@ -141,7 +144,7 @@ class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 class ArticlePublishAPIView(GenericAPIView):
     """Change Article Status to PUBLISHED"""
 
-    queryset = Article.objects.all()
+    queryset = Article.objects.filter(status__in=[Article.DRAFT, Article.PENDING])
     serializer_class = ArticleSerializer
     permission_classes = [IsAuthenticated, OwnerAndAdmin]
     lookup_field = "uuid"
@@ -275,7 +278,7 @@ class CourseListCreateAPIView(ListCreateAPIView):
         return CourseSerializer
 
     def get_queryset(self):
-        if isinstance(self.request.user, get_user_model()):
+        if self.request.user.is_authenticated:
             return Course.objects.filter(Q(author=self.request.user) | Q(status=Course.PUBLISHED))
         return Course.objects.filter(status=Course.PUBLISHED)
 
@@ -309,15 +312,22 @@ class CourseListCreateAPIView(ListCreateAPIView):
 
 class CourseRetrieveAPIView(RetrieveAPIView):
     """Course Details"""
-    queryset = Course.objects.all()
     lookup_field = "uuid"
     serializer_class = CourseSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_authenticated:
+            if self.request.user.is_superuser:
+                return Course.objects.all()
+            else:
+                return Course.objects.filter(Q(author=self.request.user) | Q(status=Course.PUBLISHED))
+        return Course.objects.filter(status=Course.PUBLISHED)
 
 
 class CoursePublishAPIView(GenericAPIView):
     """Change course Status to PUBLISHED"""
 
-    queryset = Course.objects.all()
+    queryset = Course.objects.filter(status=Course.PENDING)
     serializer_class = CourseSerializer
     permission_classes = [IsAuthenticated, IsAdmin]
     lookup_field = "uuid"
@@ -331,5 +341,5 @@ class CoursePublishAPIView(GenericAPIView):
 
 
 class CourseCommentListCreateAPIView(CommentListCreateAbstractView):
-    queryset = Course.objects.all()
+    queryset = Course.objects.filter(status=Course.PUBLISHED)
     serializer_class = CommentAndRateSerializer
