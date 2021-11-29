@@ -11,10 +11,10 @@ class CourseFilter(filters.FilterSet):
     @staticmethod
     def filter_status(queryset, name, value):
         status_map = {
-            "0": Course.DRAFT,
+            # "0": Course.DRAFT,
             "1": Course.PENDING,
             "2": Course.PUBLISHED,
-            "draft": Course.DRAFT,
+            # "draft": Course.DRAFT,
             "pending": Course.PENDING,
             "published": Course.PUBLISHED,
         }
