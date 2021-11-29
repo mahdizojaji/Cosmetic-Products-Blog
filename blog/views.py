@@ -14,7 +14,7 @@ from comments.views import CommentListCreateAbstractView
 from comments.serializers import CommentSerializer, CommentAndRateSerializer
 
 from .models import Article, Course
-from .filters import CourseFilter
+from .filters import CourseFilter, ArticleFilter
 from .serializers import (
     ArticleSerializer, ArticleWriteSerializer, OnlineCourseSerializer, OfflineCourseSerializer, CourseSerializer
 )
@@ -31,8 +31,9 @@ class ArticleListCreateAPIView(ListCreateAPIView):
     """Create &  List Articles"""
     permission_classes = [FullProfileOrReadOnly]
     parser_classes = (MultiPartParser, FormParser,)
-    filterset_fields = ("author", "title", "content", "slug")
+    filterset_class = ArticleFilter
     ordering_fields = ("-created_at", )
+    search_fields = ("title", "content")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -251,6 +252,7 @@ class CourseListCreateAPIView(ListCreateAPIView):
     permission_classes = [FullProfileOrReadOnly]
     filterset_class = CourseFilter
     search_fields = ("title", "content")
+    ordering_fields = ("-created_at", )
     parser_classes = (MultiPartParser, FormParser,)
 
     # TODO: check is seller or vip (hide sessions & addresses for non-vip)

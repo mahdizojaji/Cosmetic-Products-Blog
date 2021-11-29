@@ -1,6 +1,6 @@
 from django_filters import rest_framework as filters
 
-from .models import Course
+from .models import Course, Article
 
 
 class CourseFilter(filters.FilterSet):
@@ -23,3 +23,25 @@ class CourseFilter(filters.FilterSet):
     class Meta:
         model = Course
         fields = ("author", "slug", "status", "cost", "is_online")
+
+
+class ArticleFilter(filters.FilterSet):
+    author = filters.UUIDFilter(field_name="author__uuid")
+    status = filters.CharFilter(method="filter_status")
+    ordering = filters.OrderingFilter(fields=("slug", "id"))
+
+    @staticmethod
+    def filter_status(queryset, name, value):
+        status_map = {
+            "0": Article.DRAFT,
+            "1": Article.PENDING,
+            "2": Article.PUBLISHED,
+            "draft": Article.DRAFT,
+            "pending": Article.PENDING,
+            "published": Article.PUBLISHED,
+        }
+        return queryset.filter(status=status_map.get(f"{value}".lower(), None))
+
+    class Meta:
+        model = Article
+        fields = ("author", "slug", "status")
