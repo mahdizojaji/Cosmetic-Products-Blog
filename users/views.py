@@ -22,13 +22,13 @@ class UserDetailsRetrieveUpdateAPIView(UserDetailsView):
 
 class UserRetrieveAPIView(RetrieveAPIView):
     serializer_class = UserSerializer
-    permission_classes = [FullProfileOrReadOnly]
+    permission_classes = [IsAuthenticated, FullProfileOrReadOnly]
     queryset = User.objects.all()
     lookup_field = "uuid"
 
 
 class UserLikeAPIView(CreateAPIView):
-    permission_classes = [FullProfile]
+    permission_classes = [IsAuthenticated, FullProfile]
     queryset = User.objects.all()
     lookup_field = "uuid"
 
@@ -43,7 +43,7 @@ class UserLikeAPIView(CreateAPIView):
 
 
 class UserBookmarkAPIView(CreateAPIView):
-    permission_classes = [FullProfile]
+    permission_classes = [IsAuthenticated, FullProfile]
     queryset = User.objects.all()
     lookup_field = "uuid"
 
@@ -60,7 +60,7 @@ class UserBookmarkAPIView(CreateAPIView):
 
 
 class UserIncreaseShareAPIView(CreateAPIView):
-    permission_classes = [FullProfile]
+    permission_classes = [IsAuthenticated, FullProfile]
     queryset = User.objects.all()
     lookup_field = "uuid"
 

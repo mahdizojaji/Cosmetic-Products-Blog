@@ -47,4 +47,4 @@ class CommentRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentAndRateSerializer
     lookup_field = "uuid"
-    permission_classes = [OwnerOrAdminOrAuthorOrReadOnly]
+    permission_classes = [IsAuthenticated, OwnerOrAdminOrAuthorOrReadOnly]
