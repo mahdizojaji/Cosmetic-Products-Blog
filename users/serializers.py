@@ -3,6 +3,7 @@ from django.urls import reverse
 from rest_framework import serializers
 
 from extensions.permissions import OwnerAndAdmin
+from extensions.serializer_fields import TimestampField
 
 User = get_user_model()
 
@@ -12,6 +13,7 @@ class UserSerializer(serializers.ModelSerializer):
     share_counts = serializers.IntegerField(source="share_qty", read_only=True)
     likes = serializers.IntegerField(source="liked_by.count", read_only=True)
     bookmarks = serializers.IntegerField(source="bookmarked_by.count", read_only=True)
+    birth_date = TimestampField()
 
     def get_comment_counts(self, obj):
         return obj.comments.count()
