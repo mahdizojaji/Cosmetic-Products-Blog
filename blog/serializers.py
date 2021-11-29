@@ -127,6 +127,7 @@ class ArticleSerializer(ArticleAbstractSerializer):
             "content",
             "images",
             "videos",
+            "premium",
         )
         read_only_fields = (
             "uuid",

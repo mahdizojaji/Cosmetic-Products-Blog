@@ -74,6 +74,7 @@ class Article(models.Model):
     status = models.IntegerField(choices=STATUS_CHOICES, default=DRAFT)
     original = models.OneToOneField("self", on_delete=models.DO_NOTHING, null=True, blank=True, related_name="clone")
     comments = GenericRelation(Comment, null=True, blank=True)
+    premium = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
