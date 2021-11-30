@@ -6,10 +6,11 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
-from rest_framework.permissions import SAFE_METHODS, IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import (
     ListCreateAPIView,
     RetrieveUpdateDestroyAPIView,
+    ListAPIView,
     CreateAPIView,
     RetrieveAPIView,
     GenericAPIView,
@@ -17,7 +18,6 @@ from rest_framework.generics import (
 
 from extensions.permissions import (
     OwnerAndAdmin,
-    OwnerAndAdminOrReadOnly,
     IsAdmin,
     FullProfile,
     FullProfileOrReadOnly,
@@ -93,6 +93,25 @@ class ArticleListCreateAPIView(ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+
+class ArticleLikedListAPIView(ListAPIView):
+    serializer_class = ArticleSerializer
+    permission_classes = [IsAuthenticated]
+    filterset_class = ArticleFilter
+    ordering_fields = ("-created_at",)
+
+    def get_queryset(self):
+        return Article.objects.filter(liked_by=self.request.user)
+
+
+class ArticleBookmarkedListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    filterset_class = ArticleFilter
+    ordering_fields = ("-created_at",)
+
+    def get_queryset(self):
+        return Article.objects.filter(bookmarked_by=self.request.user)
 
 
 class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):

@@ -7,6 +7,8 @@ app_name = "blog"
 urlpatterns = [
     # Articles
     path("articles/", views.ArticleListCreateAPIView.as_view(), name="articles_list_create"),
+    path("articles/liked/", views.ArticleLikedListAPIView.as_view(), name="articles_liked_list"),
+    path("articles/bookmarked/", views.ArticleBookmarkedListAPIView.as_view(), name="articles_bookmarked_list"),
     path("articles/<uuid:uuid>/", views.ArticleRetrieveUpdateDestroyAPIView.as_view(),
          name="articles_retrieve_update_destroy"),
     path("articles/<uuid:uuid>/like/", views.ArticleLikeAPIView.as_view(), name="articles_like"),
