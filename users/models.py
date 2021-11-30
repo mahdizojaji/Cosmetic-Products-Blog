@@ -133,7 +133,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     province = IntegerField(choices=iran_provinces, blank=True, null=True)
     city = CharField(max_length=30, blank=True, null=True)
-    vip_expire = BigIntegerField(default=0, blank=True)
+    subscription_expire = BigIntegerField(default=0, blank=True)
     liked_by = ManyToManyField("self", related_name="liked_users", blank=True)
     bookmarked_by = ManyToManyField("self", related_name="bookmarked_users", blank=True)
     share_qty = BigIntegerField(default=0, blank=True)

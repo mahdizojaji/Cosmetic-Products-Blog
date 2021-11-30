@@ -39,7 +39,7 @@ class UserSerializer(serializers.ModelSerializer):
             "share_counts",
             "job_title",
             "bio",
-            "vip_expire",
+            "subscription_expire",
             "is_superuser",
             "credit",
         )
@@ -47,7 +47,7 @@ class UserSerializer(serializers.ModelSerializer):
             "phone_number",
             "email",
             "birth_date",
-            "vip_expire",
+            "subscription_expire",
             "is_superuser",
         )
         read_only_fields = (
@@ -59,7 +59,7 @@ class UserSerializer(serializers.ModelSerializer):
             "rate_counts",
             "comment_counts",
             "share_counts",
-            "vip_expire",
+            "subscription_expire",
             "is_superuser",
             "credit",
         )

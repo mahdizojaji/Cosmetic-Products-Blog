@@ -75,7 +75,7 @@ class ArticleListCreateAPIView(ListCreateAPIView):
                 author=self.request.user
             )
 
-            if self.request.user.vip_expire > int(timezone.now().timestamp()):
+            if self.request.user.subscription_expire > int(timezone.now().timestamp()):
                 # include premium articles for vip users
                 query = Q(status=Article.PUBLISHED) | Q(author=self.request.user)
 
@@ -126,7 +126,7 @@ class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
                 author=self.request.user
             )
 
-            if self.request.user.vip_expire > int(timezone.now().timestamp()):
+            if self.request.user.subscription_expire > int(timezone.now().timestamp()):
                 # include premium articles for vip users
                 query = Q(status=Article.PUBLISHED) | Q(author=self.request.user)
 
