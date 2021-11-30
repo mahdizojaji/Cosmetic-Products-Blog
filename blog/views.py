@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import SAFE_METHODS, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.generics import (
     ListCreateAPIView,
     RetrieveUpdateDestroyAPIView,
@@ -47,11 +47,8 @@ class ArticleCommentListCreateAPIView(CommentListCreateAbstractView):
 class ArticleListCreateAPIView(ListCreateAPIView):
     """Create &  List Articles"""
 
-    permission_classes = [IsAuthenticated, FullProfileOrReadOnly]
-    parser_classes = (
-        MultiPartParser,
-        FormParser,
-    )
+    permission_classes = [FullProfileOrReadOnly]
+    parser_classes = (MultiPartParser, FormParser)
     filterset_class = ArticleFilter
     ordering_fields = ("-created_at",)
     search_fields = ("title", "content")
@@ -100,12 +97,8 @@ class ArticleListCreateAPIView(ListCreateAPIView):
 
 class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     """Retrieve, Update & Delete Articles"""
-
-    permission_classes = [IsAuthenticated, FullProfileOrReadOnly]
-    parser_classes = (
-        MultiPartParser,
-        FormParser,
-    )
+    permission_classes = [FullProfileOrReadOnly]
+    parser_classes = (MultiPartParser, FormParser)
     lookup_field = "uuid"
 
     def __init__(self, *args, **kwargs):
@@ -190,7 +183,7 @@ class ArticlePublishAPIView(GenericAPIView):
 
     queryset = Article.objects.filter(status__in=[Article.DRAFT, Article.PENDING])
     serializer_class = ArticleSerializer
-    permission_classes = [IsAuthenticated, OwnerAndAdmin]
+    permission_classes = [OwnerAndAdmin]
     lookup_field = "uuid"
 
     def publish(self):
@@ -257,7 +250,7 @@ class ArticlePublishAPIView(GenericAPIView):
 class ArticleLikeAPIView(CreateAPIView):
     """Like & Unlike an Article"""
 
-    permission_classes = [IsAuthenticated, FullProfile]
+    permission_classes = [FullProfile]
     queryset = Article.objects.filter(status=Article.PUBLISHED)
     lookup_field = "uuid"
 
@@ -274,7 +267,7 @@ class ArticleLikeAPIView(CreateAPIView):
 class ArticleBookmarkAPIView(CreateAPIView):
     """Bookmark & Un-bookmark an Article"""
 
-    permission_classes = [IsAuthenticated, FullProfile]
+    permission_classes = [FullProfile]
     queryset = Article.objects.filter(status=Article.PUBLISHED)
     lookup_field = "uuid"
 
@@ -291,7 +284,7 @@ class ArticleBookmarkAPIView(CreateAPIView):
 class ArticleIncreaseShareAPIView(CreateAPIView):
     """Increase Article Share Count"""
 
-    permission_classes = [IsAuthenticated, FullProfile]
+    permission_classes = [FullProfile]
     queryset = Article.objects.filter(status=Article.PUBLISHED)
     lookup_field = "uuid"
 
@@ -304,8 +297,7 @@ class ArticleIncreaseShareAPIView(CreateAPIView):
 
 class CourseListCreateAPIView(ListCreateAPIView):
     """List & Create Course"""
-
-    permission_classes = [IsAuthenticated, FullProfileOrReadOnly]
+    permission_classes = [FullProfileOrReadOnly]
     filterset_class = CourseFilter
     search_fields = ("title", "content")
     ordering_fields = ("-created_at",)
@@ -391,7 +383,7 @@ class CoursePublishAPIView(GenericAPIView):
 
     queryset = Course.objects.filter(status=Course.PENDING)
     serializer_class = CourseSerializer
-    permission_classes = [IsAuthenticated, IsAdmin]
+    permission_classes = [IsAdmin]
     lookup_field = "uuid"
 
     def get(self, request, *args, **kwargs):
