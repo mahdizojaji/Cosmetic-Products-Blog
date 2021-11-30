@@ -77,6 +77,8 @@ class Article(models.Model):
     premium = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    edited_at = models.DateTimeField(null=True, blank=True)
+    published_at = models.DateTimeField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
         self.slug = slugify(f"{self.title} {int(timezone.now().timestamp())}", allow_unicode=True)
@@ -116,7 +118,8 @@ class Course(models.Model):
     # offline course fields:
     address = models.TextField(verbose_name='Address', null=True, blank=True)
     deadline = models.DateTimeField(verbose_name='Deadline', null=True, blank=True, validators=[FutureDateValidator()])
-
+    edited_at = models.DateTimeField(null=True, blank=True)
+    published_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

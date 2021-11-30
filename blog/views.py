@@ -199,11 +199,13 @@ class ArticlePublishAPIView(GenericAPIView):
                 if field in update_fields:
                     # replacing original article with clone data
                     setattr(original, field, value)
+            original.edited_at = timezone.now()
             original.save()
             # removing temp clone
             self.obj.delete()
         else:
             self.obj.status = Article.PUBLISHED
+            self.obj.edited_at = self.obj.published_at = timezone.now()
             self.obj.save()
 
         # credit
@@ -213,9 +215,6 @@ class ArticlePublishAPIView(GenericAPIView):
         self.obj.author.save()
 
     def get(self, request, *args, **kwargs):
-        return self.post(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
         self.detail = None
         obj = self.obj = self.get_object()
         # DRAFT
@@ -389,6 +388,7 @@ class CoursePublishAPIView(GenericAPIView):
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
         obj.status = Article.PUBLISHED
+        obj.published_at = timezone.now()
         obj.save()
         serializer = self.get_serializer(instance=obj)
         return Response(serializer.data, status=status.HTTP_200_OK)
