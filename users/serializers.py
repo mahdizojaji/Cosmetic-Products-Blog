@@ -41,6 +41,7 @@ class UserSerializer(serializers.ModelSerializer):
             "bio",
             "vip_expire",
             "is_superuser",
+            "credit",
         )
         private_fields = (
             "phone_number",
@@ -60,6 +61,7 @@ class UserSerializer(serializers.ModelSerializer):
             "share_counts",
             "vip_expire",
             "is_superuser",
+            "credit",
         )
 
     def get_fields(self):

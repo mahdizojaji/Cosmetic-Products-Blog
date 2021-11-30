@@ -141,6 +141,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     rate = DecimalField(max_digits=2, decimal_places=1, default=0)
     rate_points = PositiveBigIntegerField(default=0)
     rate_counts = PositiveBigIntegerField(default=0)
+    credit = PositiveBigIntegerField(default=0)
     is_active = BooleanField(default=True)
     is_staff = BooleanField(default=False)
     is_superuser = BooleanField(default=False)

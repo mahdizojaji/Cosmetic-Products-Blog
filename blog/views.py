@@ -24,6 +24,7 @@ from extensions.permissions import (
 )
 from comments.views import CommentListCreateAbstractView
 from comments.serializers import CommentSerializer, CommentAndRateSerializer
+from config.settings import ARTICLE_CREDIT, PREMIUM_ARTICLE_CREDIT
 
 from .models import Article, Course
 from .filters import CourseFilter, ArticleFilter
@@ -193,26 +194,32 @@ class ArticlePublishAPIView(GenericAPIView):
     lookup_field = "uuid"
 
     def publish(self):
-        if self.obj.content:
-            if original := self.obj.original:
-                update_fields = ("title", "content", "images", "videos")
-                # By using clone mechanism, published articles remain
-                # intact until their clone get published.
-                for field, value in model_to_dict(self.obj).items():
-                    if field in update_fields:
-                        # replacing original article with clone data
-                        setattr(original, field, value)
-                original.save()
-                # removing temp clone
-                self.obj.delete()
-            else:
-                self.obj.status = Article.PUBLISHED
-                self.obj.save()
-        else:
+        if not self.obj.content:
             self.detail = "Article content is required."
+            return
+
+        if original := self.obj.original:
+            update_fields = ("title", "content", "images", "videos")
+            # By using clone mechanism, published articles remain
+            # intact until their clone get published.
+            for field, value in model_to_dict(self.obj).items():
+                if field in update_fields:
+                    # replacing original article with clone data
+                    setattr(original, field, value)
+            original.save()
+            # removing temp clone
+            self.obj.delete()
+        else:
+            self.obj.status = Article.PUBLISHED
+            self.obj.save()
+
+        # credit
+        self.obj.author.credit += (
+            PREMIUM_ARTICLE_CREDIT if self.obj.premium else ARTICLE_CREDIT
+        )
+        self.obj.author.save()
 
     def get(self, request, *args, **kwargs):
-
         return self.post(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -228,15 +235,13 @@ class ArticlePublishAPIView(GenericAPIView):
                 obj.status = Article.PENDING
                 obj.save()
         # PENDING
-        elif obj.status is Article.PENDING:
+        else:
             if request.user.is_superuser:
                 # publish
                 self.publish()
             else:
                 self.detail = "You dont have permission to publish articles."
-        # PUBLISHED
-        elif obj.status is Article.PUBLISHED:
-            self.detail = "Article is already published!"
+
         if self.detail:
             return Response(
                 {
