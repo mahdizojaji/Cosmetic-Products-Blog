@@ -100,12 +100,17 @@ class ArticleSerializer(ArticleAbstractSerializer):
     comment_counts = serializers.SerializerMethodField()
 
     def get_is_liked(self, obj: Article):
-        return obj.liked_by.filter(uuid=self.context["request"].user.uuid).exists()
+        user = self.context["request"].user
+        uuid = user.uuid if user.is_authenticated else None
+        return obj.liked_by.filter(uuid=uuid).exists()
 
     def get_is_bookmarked(self, obj: Article):
-        return obj.bookmarked_by.filter(uuid=self.context["request"].user.uuid).exists()
+        user = self.context["request"].user
+        uuid = user.uuid if user.is_authenticated else None
+        return obj.bookmarked_by.filter(uuid=uuid).exists()
 
-    def get_comment_counts(self, obj: Article):
+    @staticmethod
+    def get_comment_counts(obj: Article):
         return obj.comments.count()
 
     class Meta:
