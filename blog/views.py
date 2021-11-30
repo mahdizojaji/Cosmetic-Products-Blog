@@ -8,17 +8,31 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import (
-    ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView, RetrieveAPIView, GenericAPIView
+    ListCreateAPIView,
+    RetrieveUpdateDestroyAPIView,
+    CreateAPIView,
+    RetrieveAPIView,
+    GenericAPIView,
 )
 
-from extensions.permissions import OwnerAndAdmin, OwnerAndAdminOrReadOnly, IsAdmin, FullProfile, FullProfileOrReadOnly
+from extensions.permissions import (
+    OwnerAndAdmin,
+    OwnerAndAdminOrReadOnly,
+    IsAdmin,
+    FullProfile,
+    FullProfileOrReadOnly,
+)
 from comments.views import CommentListCreateAbstractView
 from comments.serializers import CommentSerializer, CommentAndRateSerializer
 
 from .models import Article, Course
 from .filters import CourseFilter, ArticleFilter
 from .serializers import (
-    ArticleSerializer, ArticleWriteSerializer, OnlineCourseSerializer, OfflineCourseSerializer, CourseSerializer
+    ArticleSerializer,
+    ArticleWriteSerializer,
+    OnlineCourseSerializer,
+    OfflineCourseSerializer,
+    CourseSerializer,
 )
 
 User = get_user_model()
@@ -31,10 +45,14 @@ class ArticleCommentListCreateAPIView(CommentListCreateAbstractView):
 
 class ArticleListCreateAPIView(ListCreateAPIView):
     """Create &  List Articles"""
+
     permission_classes = [IsAuthenticated, FullProfileOrReadOnly]
-    parser_classes = (MultiPartParser, FormParser,)
+    parser_classes = (
+        MultiPartParser,
+        FormParser,
+    )
     filterset_class = ArticleFilter
-    ordering_fields = ("-created_at", )
+    ordering_fields = ("-created_at",)
     search_fields = ("title", "content")
 
     def __init__(self, *args, **kwargs):
@@ -52,17 +70,18 @@ class ArticleListCreateAPIView(ListCreateAPIView):
 
     def get_queryset(self):
         query = Q(status=Article.PUBLISHED, premium=False)
-        
+
         if self.request.user.is_authenticated:
             # include self articles
-            query = Q(status=Article.PUBLISHED, premium=False) | Q(author=self.request.user)
-            
+            query = Q(status=Article.PUBLISHED, premium=False) | Q(
+                author=self.request.user
+            )
+
             if self.request.user.vip_expire > int(timezone.now().timestamp()):
                 # include premium articles for vip users
                 query = Q(status=Article.PUBLISHED) | Q(author=self.request.user)
-                
+
         return Article.objects.filter(query)
-        
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -70,7 +89,9 @@ class ArticleListCreateAPIView(ListCreateAPIView):
         self.perform_create(serializer)
         serializer = self.get_serializer(instance=serializer.instance)
         headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -78,8 +99,12 @@ class ArticleListCreateAPIView(ListCreateAPIView):
 
 class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     """Retrieve, Update & Delete Articles"""
+
     permission_classes = [IsAuthenticated, FullProfileOrReadOnly]
-    parser_classes = (MultiPartParser, FormParser,)
+    parser_classes = (
+        MultiPartParser,
+        FormParser,
+    )
     lookup_field = "uuid"
 
     def __init__(self, *args, **kwargs):
@@ -96,12 +121,22 @@ class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
         return ArticleSerializer
 
     def get_queryset(self):
+        if self.request.user.is_superuser:
+            return Article.objects.all()
+
+        query = Q(status=Article.PUBLISHED, premium=False)
+
         if self.request.user.is_authenticated:
-            if self.request.user.is_superuser:
-                return Article.objects.all()
-            else:
-                return Article.objects.filter(Q(author=self.request.user) | Q(status=Article.PUBLISHED))
-        return Article.objects.filter(status=Article.PUBLISHED)
+            # include self articles
+            query = Q(status=Article.PUBLISHED, premium=False) | Q(
+                author=self.request.user
+            )
+
+            if self.request.user.vip_expire > int(timezone.now().timestamp()):
+                # include premium articles for vip users
+                query = Q(status=Article.PUBLISHED) | Q(author=self.request.user)
+
+        return Article.objects.filter(query)
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop("partial", False)
@@ -156,7 +191,7 @@ class ArticlePublishAPIView(GenericAPIView):
     serializer_class = ArticleSerializer
     permission_classes = [IsAuthenticated, OwnerAndAdmin]
     lookup_field = "uuid"
-    
+
     def publish(self):
         if self.obj.content:
             if original := self.obj.original:
@@ -176,6 +211,10 @@ class ArticlePublishAPIView(GenericAPIView):
         else:
             self.detail = "Article content is required."
 
+    def get(self, request, *args, **kwargs):
+
+        return self.post(request, *args, **kwargs)
+
     def post(self, request, *args, **kwargs):
         self.detail = None
         obj = self.obj = self.get_object()
@@ -188,7 +227,7 @@ class ArticlePublishAPIView(GenericAPIView):
                 # only gets pending
                 obj.status = Article.PENDING
                 obj.save()
-        # PENDING        
+        # PENDING
         elif obj.status is Article.PENDING:
             if request.user.is_superuser:
                 # publish
@@ -260,12 +299,15 @@ class ArticleIncreaseShareAPIView(CreateAPIView):
 
 class CourseListCreateAPIView(ListCreateAPIView):
     """List & Create Course"""
-    
+
     permission_classes = [IsAuthenticated, FullProfileOrReadOnly]
     filterset_class = CourseFilter
     search_fields = ("title", "content")
-    ordering_fields = ("-created_at", )
-    parser_classes = (MultiPartParser, FormParser,)
+    ordering_fields = ("-created_at",)
+    parser_classes = (
+        MultiPartParser,
+        FormParser,
+    )
 
     # TODO: check is seller or vip (hide sessions & addresses for non-vip)
 
@@ -287,7 +329,9 @@ class CourseListCreateAPIView(ListCreateAPIView):
 
     def get_queryset(self):
         if self.request.user.is_authenticated:
-            return Course.objects.filter(Q(author=self.request.user) | Q(status=Course.PUBLISHED))
+            return Course.objects.filter(
+                Q(author=self.request.user) | Q(status=Course.PUBLISHED)
+            )
         return Course.objects.filter(status=Course.PUBLISHED)
 
     def create(self, request, *args, **kwargs):
@@ -309,17 +353,20 @@ class CourseListCreateAPIView(ListCreateAPIView):
 
         serializer = self.get_serializer(instance=serializer.instance)
         headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
 
     def perform_create(self, serializer):
         serializer.save(
             author=self.request.user,
-            is_online=True if self.course_method == "online" else False
+            is_online=True if self.course_method == "online" else False,
         )
 
 
 class CourseRetrieveAPIView(RetrieveAPIView):
     """Course Details"""
+
     lookup_field = "uuid"
     serializer_class = CourseSerializer
 
@@ -328,7 +375,9 @@ class CourseRetrieveAPIView(RetrieveAPIView):
             if self.request.user.is_superuser:
                 return Course.objects.all()
             else:
-                return Course.objects.filter(Q(author=self.request.user) | Q(status=Course.PUBLISHED))
+                return Course.objects.filter(
+                    Q(author=self.request.user) | Q(status=Course.PUBLISHED)
+                )
         return Course.objects.filter(status=Course.PUBLISHED)
 
 
