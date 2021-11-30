@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.utils import timezone
 from django.forms.models import model_to_dict
 from django.contrib.auth import get_user_model
 
@@ -50,11 +51,18 @@ class ArticleListCreateAPIView(ListCreateAPIView):
         return ArticleSerializer
 
     def get_queryset(self):
+        query = Q(status=Article.PUBLISHED, premium=False)
+        
         if self.request.user.is_authenticated:
-            return Article.objects.filter(
-                Q(author=self.request.user) | Q(status=Article.PUBLISHED)
-            )
-        return Article.objects.filter(status=Article.PUBLISHED)
+            # include self articles
+            query = Q(status=Article.PUBLISHED, premium=False) | Q(author=self.request.user)
+            
+            if self.request.user.vip_expire > int(timezone.now().timestamp()):
+                # include premium articles for vip users
+                query = Q(status=Article.PUBLISHED) | Q(author=self.request.user)
+                
+        return Article.objects.filter(query)
+        
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
