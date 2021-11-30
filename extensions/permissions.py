@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
+from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 from blog.models import Article
 from comments.models import Comment
@@ -7,12 +7,12 @@ from comments.models import Comment
 User = get_user_model()
 
 
-class IsAdmin(IsAuthenticated):
+class IsAdmin(BasePermission):
     def has_permission(self, request, view):
         return request.user.is_superuser
 
 
-class OwnerAndAdmin(IsAuthenticated):
+class OwnerAndAdmin(BasePermission):
     """This permissions is only True for
     Authenticated Admin or Owner itself"""
 
@@ -29,8 +29,11 @@ class OwnerAndAdmin(IsAuthenticated):
         return False
 
 
-class OwnerAndAdminOrReadOnly(IsAuthenticated):
+class OwnerAndAdminOrReadOnly(BasePermission):
     def has_object_permission(self, request, view, obj):
+        if request.method in SAFE_METHODS:
+            return True
+
         if request.user.is_superuser:
             return True
 
@@ -40,14 +43,14 @@ class OwnerAndAdminOrReadOnly(IsAuthenticated):
         if isinstance(obj, (Article, Comment)) and obj.author == request.user:
             return True
 
-        if request.method in SAFE_METHODS:
-            return True
-
         return False
 
 
-class OwnerOrAdminOrAuthorOrReadOnly(IsAuthenticated):
+class OwnerOrAdminOrAuthorOrReadOnly(BasePermission):
     def has_object_permission(self, request, view, obj):
+        if request.method in SAFE_METHODS:
+            return True
+
         if request.user.is_superuser:
             return True
 
@@ -60,33 +63,25 @@ class OwnerOrAdminOrAuthorOrReadOnly(IsAuthenticated):
         if isinstance(obj, Comment) and obj.content_object.author == request.user:
             return True
 
-        if request.method in SAFE_METHODS:
-            return True
-
         return False
 
 
-class FullProfile(IsAuthenticated):
+class FullProfile(BasePermission):
+    message = 'You must have a full profile to access this resource'
+
     def has_permission(self, request, view):
+
         user = request.user
-        return all([
-            user.birth_date,
-            user.fname,
-            user.lname,
-            user.city,
-            user.province,
-            user.avatar_img,
+        return user.is_authenticated and all([
+            user.birth_date, user.fname, user.lname, user.city, user.province, user.avatar_img,
         ])
 
 
-class FullProfileOrReadOnly(IsAuthenticated):
+class FullProfileOrReadOnly(BasePermission):
+    message = 'You must have a full profile to access this resource'
+
     def has_permission(self, request, view):
         user = request.user
-        return all([
-            user.birth_date,
-            user.fname,
-            user.lname,
-            user.city,
-            user.province,
-            user.avatar_img,
-        ]) or request.method in SAFE_METHODS
+        return request.method in SAFE_METHODS or (user.is_authenticated and all([
+            user.birth_date, user.fname, user.lname, user.city, user.province, user.avatar_img
+        ]))
