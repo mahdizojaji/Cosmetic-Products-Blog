@@ -5,7 +5,6 @@ from .views import (
     UserLikeAPIView,
     UserBookmarkAPIView,
     UserIncreaseShareAPIView,
-    UserContentsListAPIView,
 )
 
 app_name = "users"
@@ -16,5 +15,4 @@ urlpatterns = [
     path("<uuid:uuid>/like/", UserLikeAPIView.as_view(), name="user_like"),
     path("<uuid:uuid>/bookmark/", UserBookmarkAPIView.as_view(), name="user_bookmark"),
     path("<uuid:uuid>/share/", UserIncreaseShareAPIView.as_view(), name="user_increase_share"),
-    path("<uuid:uuid>/content/", UserContentsListAPIView.as_view(), name="user_content_list"),
 ]

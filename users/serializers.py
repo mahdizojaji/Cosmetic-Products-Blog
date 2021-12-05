@@ -89,12 +89,3 @@ class AuthorReadOnlySerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("uuid", "avatar_img", "name", "bio", "job_title", "url")
-
-
-class UserContentSerializer(serializers.BaseSerializer):
-    def to_representation(self, instance):
-        return {
-            "uuid": instance.uuid,
-            "title": instance.title,
-            "model": type(instance).__name__,
-        }
