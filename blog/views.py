@@ -116,6 +116,7 @@ class ArticleBookmarkedListAPIView(ListAPIView):
 
 class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     """Retrieve, Update & Delete Articles"""
+
     permission_classes = [FullProfileOrReadOnly]
     parser_classes = (MultiPartParser, FormParser)
     lookup_field = "uuid"
@@ -170,7 +171,7 @@ class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
         elif _status == Article.PUBLISHED:
-            if instance.clone:
+            if hasattr(instance, "clone"):
                 # preventing update of published article
                 return Response(
                     {
@@ -315,6 +316,7 @@ class ArticleIncreaseShareAPIView(CreateAPIView):
 
 class CourseListCreateAPIView(ListCreateAPIView):
     """List & Create Course"""
+
     permission_classes = [FullProfileOrReadOnly]
     filterset_class = CourseFilter
     search_fields = ("title", "content")
