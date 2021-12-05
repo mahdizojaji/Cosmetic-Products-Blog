@@ -106,6 +106,7 @@ class ArticleLikedListAPIView(ListAPIView):
 
 
 class ArticleBookmarkedListAPIView(ListAPIView):
+    serializer_class = ArticleSerializer
     permission_classes = [IsAuthenticated]
     filterset_class = ArticleFilter
     ordering_fields = ("-created_at",)
