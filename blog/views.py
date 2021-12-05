@@ -216,7 +216,7 @@ class ArticlePublishAPIView(GenericAPIView):
             # By using clone mechanism, published articles remain
             # intact until their clone get published.
             for field, value in model_to_dict(self.obj).items():
-                if field in update_fields:
+                if field in update_fields and value:
                     # replacing original article with clone data
                     setattr(original, field, value)
             original.edited_at = timezone.now()
