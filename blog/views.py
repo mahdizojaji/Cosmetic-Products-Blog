@@ -228,11 +228,11 @@ class ArticlePublishAPIView(GenericAPIView):
             self.obj.edited_at = self.obj.published_at = timezone.now()
             self.obj.save()
 
-        # credit
-        self.obj.author.credit += (
-            PREMIUM_ARTICLE_CREDIT if self.obj.premium else ARTICLE_CREDIT
-        )
-        self.obj.author.save()
+            # credit
+            self.obj.author.credit += (
+                PREMIUM_ARTICLE_CREDIT if self.obj.premium else ARTICLE_CREDIT
+            )
+            self.obj.author.save()
 
     def get(self, request, *args, **kwargs):
         self.detail = None
