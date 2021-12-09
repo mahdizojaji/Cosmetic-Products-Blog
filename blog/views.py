@@ -42,6 +42,7 @@ User = get_user_model()
 class ArticleCommentListCreateAPIView(CommentListCreateAbstractView):
     queryset = Article.objects.filter(status=Article.PUBLISHED)
     serializer_class = CommentSerializer
+    ordering_fields = ("-updated_at",)
 
 
 class ArticleListCreateAPIView(ListCreateAPIView):
@@ -50,7 +51,6 @@ class ArticleListCreateAPIView(ListCreateAPIView):
     permission_classes = [FullProfileOrReadOnly]
     parser_classes = (MultiPartParser, FormParser)
     filterset_class = ArticleFilter
-    ordering_fields = ("-created_at",)
     search_fields = ("title", "content")
 
     def __init__(self, *args, **kwargs):
@@ -79,7 +79,7 @@ class ArticleListCreateAPIView(ListCreateAPIView):
                 # include premium articles for vip users
                 query = Q(status=Article.PUBLISHED) | Q(author=self.request.user)
 
-        return Article.objects.filter(query)
+        return Article.objects.filter(query).order_by("-updated_at",)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -99,7 +99,7 @@ class ArticleLikedListAPIView(ListAPIView):
     serializer_class = ArticleSerializer
     permission_classes = [IsAuthenticated]
     filterset_class = ArticleFilter
-    ordering_fields = ("-created_at",)
+    ordering_fields = ("-updated_at",)
 
     def get_queryset(self):
         return Article.objects.filter(liked_by=self.request.user)
@@ -109,7 +109,7 @@ class ArticleBookmarkedListAPIView(ListAPIView):
     serializer_class = ArticleSerializer
     permission_classes = [IsAuthenticated]
     filterset_class = ArticleFilter
-    ordering_fields = ("-created_at",)
+    ordering_fields = ("-updated_at",)
 
     def get_queryset(self):
         return Article.objects.filter(bookmarked_by=self.request.user)
@@ -202,7 +202,7 @@ class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 class ArticlePublishAPIView(GenericAPIView):
     """Change Article Status to PUBLISHED"""
 
-    queryset = Article.objects.filter(status__in=[Article.DRAFT, Article.PENDING])
+    queryset = Article.objects.filter(status__in=[Article.DRAFT, Article.PENDING]).order_by("-updated_at")
     serializer_class = ArticleSerializer
     permission_classes = [OwnerAndAdmin]
     lookup_field = "uuid"
@@ -321,7 +321,6 @@ class CourseListCreateAPIView(ListCreateAPIView):
     permission_classes = [FullProfileOrReadOnly]
     filterset_class = CourseFilter
     search_fields = ("title", "content")
-    ordering_fields = ("-created_at",)
     parser_classes = (
         MultiPartParser,
         FormParser,
@@ -349,8 +348,8 @@ class CourseListCreateAPIView(ListCreateAPIView):
         if self.request.user.is_authenticated:
             return Course.objects.filter(
                 Q(author=self.request.user) | Q(status=Course.PUBLISHED)
-            )
-        return Course.objects.filter(status=Course.PUBLISHED)
+            ).order_by("-updated_at")
+        return Course.objects.filter(status=Course.PUBLISHED).order_by("-updated_at")
 
     def create(self, request, *args, **kwargs):
         self.course_method = self.request.query_params.get("method")
