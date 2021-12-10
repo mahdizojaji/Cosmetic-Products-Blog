@@ -1,7 +1,9 @@
+from django.shortcuts import reverse
 from django.contrib.auth import get_user_model
-from django.urls import reverse
+
 from rest_framework import serializers
 
+from comments.models import Comment
 from extensions.permissions import OwnerAndAdmin
 from extensions.serializer_fields import TimestampField
 
@@ -89,3 +91,21 @@ class AuthorReadOnlySerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("uuid", "avatar_img", "name", "bio", "job_title", "url")
+
+
+class AuthorCommentsSerializer(serializers.ModelSerializer):
+    object_url = serializers.SerializerMethodField()
+
+    def get_object_url(self, obj: Comment):
+        request = self.context["request"]
+        if obj.content_type.model == 'article':
+            return request.build_absolute_uri(
+                reverse('blog:articles_retrieve_update_destroy', args=(obj.content_object.uuid,))
+            )
+        elif obj.content_type.model == 'course':
+            return request.build_absolute_uri(reverse('blog:course_retrieve', args=(obj.content_object.uuid,)))
+        return ''
+
+    class Meta:
+        model = Comment
+        fields = ("uuid", "author", "text", "rate", "object_url", "created_at", "updated_at")
