@@ -279,9 +279,10 @@ class ArticleLikeAPIView(CreateAPIView):
         user = request.user
         if Article.objects.filter(uuid=article.uuid, liked_by__in=[user]).exists():
             article.liked_by.remove(user)
+            return Response({"is_liked": False}, status=status.HTTP_200_OK)
         else:
             article.liked_by.add(user)
-        return Response(status=status.HTTP_200_OK)
+            return Response({"is_liked": True}, status=status.HTTP_200_OK)
 
 
 class ArticleBookmarkAPIView(CreateAPIView):
@@ -296,9 +297,10 @@ class ArticleBookmarkAPIView(CreateAPIView):
         user = request.user
         if Article.objects.filter(uuid=article.uuid, bookmarked_by__in=[user]).exists():
             article.bookmarked_by.remove(user)
+            return Response({"is_bookmarked": False}, status=status.HTTP_200_OK)
         else:
             article.bookmarked_by.add(user)
-        return Response(status=status.HTTP_200_OK)
+            return Response({"is_bookmarked": True}, status=status.HTTP_200_OK)
 
 
 class ArticleIncreaseShareAPIView(CreateAPIView):
