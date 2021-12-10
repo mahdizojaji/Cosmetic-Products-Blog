@@ -37,9 +37,10 @@ class UserLikeAPIView(CreateAPIView):
         user = request.user
         if User.objects.filter(uuid=user_profile.uuid, liked_by__in=[user]).exists():
             user_profile.liked_by.remove(user)
+            return Response({"is_liked": False}, status=status.HTTP_200_OK)
         else:
             user_profile.liked_by.add(user)
-        return Response(status=status.HTTP_200_OK)
+            return Response({"is_liked": True}, status=status.HTTP_200_OK)
 
 
 class UserBookmarkAPIView(CreateAPIView):
@@ -54,9 +55,10 @@ class UserBookmarkAPIView(CreateAPIView):
             uuid=user_profile.uuid, bookmarked_by__in=[user]
         ).exists():
             user_profile.bookmarked_by.remove(user)
+            return Response({"is_bookmarked": False}, status=status.HTTP_200_OK)
         else:
             user_profile.bookmarked_by.add(user)
-        return Response(status=status.HTTP_200_OK)
+            return Response({"is_bookmarked": True}, status=status.HTTP_200_OK)
 
 
 class UserIncreaseShareAPIView(CreateAPIView):
