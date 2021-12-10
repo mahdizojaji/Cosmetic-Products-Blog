@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.generics import CreateAPIView, RetrieveAPIView, ListAPIView
+from rest_framework.generics import GenericAPIView, CreateAPIView, RetrieveAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
 
 from dj_rest_auth.views import UserDetailsView
@@ -31,12 +31,12 @@ class UserRetrieveAPIView(RetrieveAPIView):
     lookup_field = "uuid"
 
 
-class UserLikeAPIView(CreateAPIView):
+class UserLikeAPIView(GenericAPIView):
     permission_classes = [IsAuthenticated, FullProfile]
     queryset = User.objects.all()
     lookup_field = "uuid"
 
-    def create(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         user_profile = self.get_object()
         user = request.user
         if User.objects.filter(uuid=user_profile.uuid, liked_by__in=[user]).exists():
@@ -47,12 +47,12 @@ class UserLikeAPIView(CreateAPIView):
             return Response({"is_liked": True}, status=status.HTTP_200_OK)
 
 
-class UserBookmarkAPIView(CreateAPIView):
+class UserBookmarkAPIView(GenericAPIView):
     permission_classes = [IsAuthenticated, FullProfile]
     queryset = User.objects.all()
     lookup_field = "uuid"
 
-    def create(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         user_profile = self.get_object()
         user = request.user
         if User.objects.filter(
@@ -65,12 +65,12 @@ class UserBookmarkAPIView(CreateAPIView):
             return Response({"is_bookmarked": True}, status=status.HTTP_200_OK)
 
 
-class UserIncreaseShareAPIView(CreateAPIView):
+class UserIncreaseShareAPIView(GenericAPIView):
     permission_classes = [IsAuthenticated, FullProfile]
     queryset = User.objects.all()
     lookup_field = "uuid"
 
-    def create(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         profile = self.get_object()
         profile.share_qty += 1
         profile.save()

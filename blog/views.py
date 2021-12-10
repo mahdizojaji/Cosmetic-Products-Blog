@@ -268,14 +268,14 @@ class ArticlePublishAPIView(GenericAPIView):
         return Response(status=status.HTTP_200_OK)
 
 
-class ArticleLikeAPIView(CreateAPIView):
+class ArticleLikeAPIView(GenericAPIView):
     """Like & Unlike an Article"""
 
     permission_classes = [FullProfile]
     queryset = Article.objects.filter(status=Article.PUBLISHED)
     lookup_field = "uuid"
 
-    def create(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         article = self.get_object()
         user = request.user
         if Article.objects.filter(uuid=article.uuid, liked_by__in=[user]).exists():
@@ -286,14 +286,14 @@ class ArticleLikeAPIView(CreateAPIView):
             return Response({"is_liked": True}, status=status.HTTP_200_OK)
 
 
-class ArticleBookmarkAPIView(CreateAPIView):
+class ArticleBookmarkAPIView(GenericAPIView):
     """Bookmark & Un-bookmark an Article"""
 
     permission_classes = [FullProfile]
     queryset = Article.objects.filter(status=Article.PUBLISHED)
     lookup_field = "uuid"
 
-    def create(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         article = self.get_object()
         user = request.user
         if Article.objects.filter(uuid=article.uuid, bookmarked_by__in=[user]).exists():
@@ -304,14 +304,14 @@ class ArticleBookmarkAPIView(CreateAPIView):
             return Response({"is_bookmarked": True}, status=status.HTTP_200_OK)
 
 
-class ArticleIncreaseShareAPIView(CreateAPIView):
+class ArticleIncreaseShareAPIView(GenericAPIView):
     """Increase Article Share Count"""
 
     permission_classes = [FullProfile]
     queryset = Article.objects.filter(status=Article.PUBLISHED)
     lookup_field = "uuid"
 
-    def create(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         article = self.get_object()
         article.share_qty += 1
         article.save()
