@@ -8,11 +8,12 @@ from rest_framework.generics import CreateAPIView
 
 from dj_rest_auth.views import LoginView
 from dj_rest_auth.utils import jwt_encode
+from rest_framework_simplejwt.views import TokenViewBase
 
 from config import settings
 from extensions.sms import generate_random_code, send_otp_sms
 
-from .serializers import SendCodeSerializer, LoginSerializer
+from .serializers import SendCodeSerializer, LoginSerializer, TokenVerifySerializer
 
 User = get_user_model()
 
@@ -134,3 +135,7 @@ class LoginAPIView(LoginView):
             response,
             status=status.HTTP_401_UNAUTHORIZED,
         )
+
+
+class TokenVerifyAPIView(TokenViewBase):
+    serializer_class = TokenVerifySerializer

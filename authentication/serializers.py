@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework.serializers import ModelSerializer
+from rest_framework_simplejwt.serializers import TokenVerifySerializer
 
 User = get_user_model()
 
@@ -23,3 +24,9 @@ class LoginUserDetailsSerializer(ModelSerializer):
         model = User
         fields = ("uuid", "phone_number")
         read_only_fields = ("uuid", "phone_number")
+
+
+class TokenVerifySerializer(TokenVerifySerializer):
+    def validate(self, attrs):
+        super().validate(attrs)
+        return {"is_valid": True}
