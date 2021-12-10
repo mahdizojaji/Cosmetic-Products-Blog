@@ -317,6 +317,14 @@ class ArticleIncreaseShareAPIView(CreateAPIView):
         return Response(status=status.HTTP_200_OK)
 
 
+class ArticlePendingListAPIView(ListAPIView):
+    """List Pending Articles"""
+
+    permission_classes = [IsAdmin]
+    serializer_class = ArticleSerializer
+    queryset = Article.objects.filter(status=Article.PENDING)
+
+
 class CourseListCreateAPIView(ListCreateAPIView):
     """List & Create Course"""
 
