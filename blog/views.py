@@ -31,6 +31,7 @@ from .filters import CourseFilter, ArticleFilter
 from .serializers import (
     ArticleSerializer,
     ArticleWriteSerializer,
+    ArticlePendingSerializer,
     OnlineCourseSerializer,
     OfflineCourseSerializer,
     CourseSerializer,
@@ -321,7 +322,7 @@ class ArticlePendingListAPIView(ListAPIView):
     """List Pending Articles"""
 
     permission_classes = [IsAdmin]
-    serializer_class = ArticleSerializer
+    serializer_class = ArticlePendingSerializer
     queryset = Article.objects.filter(status=Article.PENDING)
 
 

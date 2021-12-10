@@ -1,6 +1,7 @@
 from uuid import uuid4
 
 from django.db import models
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 from django.contrib.auth import get_user_model
@@ -86,6 +87,9 @@ class Article(models.Model):
 
     def __str__(self):
         return f"{self.slug}"
+    
+    def reverse_url(self):
+        return reverse("blog:articles_retrieve_update_destroy", kwargs={"uuid": self.uuid})
 
 
 class Course(models.Model):

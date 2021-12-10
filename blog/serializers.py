@@ -26,13 +26,10 @@ class ArticleAbstractSerializer(serializers.ModelSerializer):
     images = serializers.SerializerMethodField()
     videos = serializers.SerializerMethodField()
     author = serializers.SerializerMethodField()
-    
-    def get_author(self, obj:Article):
-        serializer = AuthorReadOnlySerializer(
-            instance=obj.author,context=self.context
-        )
+
+    def get_author(self, obj: Article):
+        serializer = AuthorReadOnlySerializer(instance=obj.author, context=self.context)
         return serializer.data
-        
 
     def get_images(self, obj: Article):
         images = obj.images.filter(field_name=MediaFile.IMAGES)
@@ -152,6 +149,34 @@ class ArticleSerializer(ArticleAbstractSerializer):
         )
 
 
+class ArticlePendingSerializer(ArticleAbstractSerializer):
+    original = serializers.SerializerMethodField()
+
+    def get_original(self, obj: Article):
+        return (
+            self.context["request"].build_absolute_uri(obj.original.reverse_url())
+            if obj.original
+            else None
+        )
+
+    class Meta:
+        model = Article
+        fields = (
+            "original",
+            "uuid",
+            "slug",
+            "created_at",
+            "published_at",
+            "edited_at",
+            "status",
+            "title",
+            "content",
+            "images",
+            "videos",
+            "premium",
+        )
+
+
 class ArticleWriteSerializer(ArticleAbstractSerializer):
     images = serializers.ListField(
         required=False,
@@ -178,11 +203,9 @@ class CourseAbstractSerializer(serializers.ModelSerializer):
     images = serializers.SerializerMethodField()
     videos = serializers.SerializerMethodField()
     author = serializers.SerializerMethodField()
-    
-    def get_author(self, obj:Article):
-        serializer = AuthorReadOnlySerializer(
-            instance=obj.author,context=self.context
-        )
+
+    def get_author(self, obj: Article):
+        serializer = AuthorReadOnlySerializer(instance=obj.author, context=self.context)
         return serializer.data
 
     def get_images(self, obj: Course):
