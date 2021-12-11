@@ -1,5 +1,5 @@
 from django.dispatch import receiver
-from django.db.models.signals import pre_save, post_delete
+from django.db.models.signals import pre_save, pre_delete
 
 from blog.models import Course, Article
 
@@ -57,8 +57,8 @@ def comment_pre_save(sender, instance, **kwargs):
     obj.author.save()
 
 
-@receiver(post_delete, sender=Comment)
-def comment_post_delete(sender, instance, **kwargs):
+@receiver(pre_delete, sender=Comment)
+def comment_pre_delete(sender, instance, **kwargs):
     obj = instance.content_object
     if not instance.rate:
         # if object is not rateable or if rate is not set,
