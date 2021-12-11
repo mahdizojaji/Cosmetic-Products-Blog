@@ -80,7 +80,9 @@ class ArticleListCreateAPIView(ListCreateAPIView):
                 # include premium articles for vip users
                 query = Q(status=Article.PUBLISHED) | Q(author=self.request.user)
 
-        return Article.objects.filter(query).order_by("-updated_at",)
+        return Article.objects.filter(query).order_by(
+            "-updated_at",
+        )
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -203,7 +205,9 @@ class ArticleRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 class ArticlePublishAPIView(GenericAPIView):
     """Change Article Status to PUBLISHED"""
 
-    queryset = Article.objects.filter(status__in=[Article.DRAFT, Article.PENDING]).order_by("-updated_at")
+    queryset = Article.objects.filter(
+        status__in=[Article.DRAFT, Article.PENDING]
+    ).order_by("-updated_at")
     serializer_class = ArticleSerializer
     permission_classes = [OwnerAndAdmin]
     lookup_field = "uuid"
@@ -429,3 +433,11 @@ class CoursePublishAPIView(GenericAPIView):
 class CourseCommentListCreateAPIView(CommentListCreateAbstractView):
     queryset = Course.objects.filter(status=Course.PUBLISHED)
     serializer_class = CommentAndRateSerializer
+
+
+class CoursePendingListAPIView(ListAPIView):
+    """List Pending Course"""
+
+    permission_classes = [IsAdmin]
+    serializer_class = CourseSerializer
+    queryset = Course.objects.filter(status=Course.PENDING)

@@ -18,6 +18,7 @@ urlpatterns = [
     path("articles/<uuid:uuid>/comments/", ArticleCommentListCreateAPIView.as_view(), name="articles_comments_list_create"),
     # Courses
     path("courses/", CourseListCreateAPIView.as_view(), name="course_list_create"),
+    path("courses/pending/", CoursePendingListAPIView.as_view(), name="course_pending_list"),
     path("courses/<uuid:uuid>/", CourseRetrieveAPIView.as_view(), name="course_retrieve"),
     path("courses/<uuid:uuid>/publish/", CoursePublishAPIView.as_view(), name="course_publish"),
     path("courses/<uuid:uuid>/comments/", CourseCommentListCreateAPIView.as_view(), name="course_comments_list_create"),
